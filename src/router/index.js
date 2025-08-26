@@ -57,6 +57,38 @@ const routes = [
             component: () => import('@/views/content/Category.vue')
           }
         ]
+      },
+      {
+        path: '/project',
+        name: 'Project',
+        meta: { title: '项目管理', icon: 'Briefcase' },
+        redirect: '/project/contract-list',
+        children: [
+          {
+          path: '/project/contract-list',
+          name: 'ContractProjectList',
+          component: () => import('@/views/project/contract-list/index.vue'),
+          meta: { title: '合同项目列表', icon: 'list' }
+        },
+        {
+          path: '/project/contract-list/detail/:id',
+          name: 'ContractProjectDetail',
+          component: () => import('@/views/project/contract-list/detail.vue'),
+          meta: { title: '合同项目详情', icon: 'detail', hidden: true }
+        },
+          {
+            path: '/project/contract-type',
+            name: 'ContractProjectType',
+            component: () => import('@/views/project/contract-type/index.vue'),
+            meta: { title: '合同项目类型', icon: 'Collection' }
+          },
+          {
+            path: '/project/business-project',
+            name: 'BusinessProject',
+            component: () => import('@/views/project/business-project/index.vue'),
+            meta: { title: '经营项目列表', icon: 'Collection' }
+          }
+        ]
       }
     ]
   },
