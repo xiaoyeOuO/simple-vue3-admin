@@ -89,6 +89,40 @@ const routes = [
             meta: { title: '经营项目列表', icon: 'Collection' }
           }
         ]
+      },
+      {
+        path: '/report',
+        name: 'Report',
+        meta: { title: '数据洞察中心', icon: 'DataAnalysis' },
+        redirect: '/report/config',
+        children: [
+          {
+            path: '/report/config',
+            name: 'ReportConfig',
+            component: () => import('@/views/report/config/index.vue'),
+            meta: { title: '日报月报配置', icon: 'Setting' }
+          }
+        ]
+      },
+      {
+        path: '/supplier',
+        name: 'Supplier',
+        meta: { title: '客商管理', icon: 'User' },
+        redirect: '/supplier/infos',
+        children: [
+          {
+            path: '/supplier/infos',
+            name: 'SupplierInfos',
+            component: () => import('@/views/supplier/infos/index.vue'),
+            meta: { title: '客商信息', icon: 'User' }
+          },
+          {
+            path: '/supplier/contacts',
+            name: 'SupplierContacts',
+            component: () => import('@/views/supplier/contacts/index.vue'),
+            meta: { title: '客商联系人', icon: 'Phone' }
+          }
+        ]
       }
     ]
   },
