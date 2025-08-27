@@ -103,8 +103,8 @@ const goToTag = (tag) => {
   if (tag.path !== route.path) {
     router.push({
       path: tag.path,
-      query: tag.query,
-      params: tag.params
+      query: tag.query || {},
+      params: tag.params || {}
     })
   }
 }
@@ -121,8 +121,8 @@ const closeSelectedTag = async (tag) => {
     const latestView = views[views.length - 1]
     router.push({
       path: latestView.path,
-      query: latestView.query,
-      params: latestView.params
+      query: latestView.query || {},
+      params: latestView.params || {}
     })
   }
 }
@@ -139,8 +139,8 @@ const closeOthersTags = async () => {
     const firstView = visitedViews.value[0]
     router.push({
       path: firstView.path,
-      query: firstView.query,
-      params: firstView.params
+      query: firstView.query || {},
+      params: firstView.params || {}
     })
   }
   
@@ -156,8 +156,8 @@ const closeAllTags = async () => {
     const firstView = visitedViews.value[0]
     router.push({
       path: firstView.path,
-      query: firstView.query,
-      params: firstView.params
+      query: firstView.query || {},
+      params: firstView.params || {}
     })
   }
   
@@ -172,9 +172,9 @@ const refreshSelectedTag = () => {
   const { path, query } = contextMenuTag.value
   router.replace({
     path: '/redirect' + path,
-    query: query
+    query: query || {}
   }).then(() => {
-    router.replace({ path, query })
+    router.replace({ path, query: query || {} })
   })
   
   closeContextMenu()

@@ -440,6 +440,10 @@ watch(() => props.projectData, loadProjectData, { immediate: true })
 watch(() => props.modelValue, (val) => {
   if (val) {
     nextTick(() => {
+      // 每次打开抽屉时重置表单
+      if (!props.projectData) {
+        resetForm()
+      }
       formRef.value?.clearValidate()
     })
   }

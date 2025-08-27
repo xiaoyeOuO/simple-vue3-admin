@@ -12,23 +12,27 @@ export const useTabsStore = defineStore('tabs', () => {
 
   // 初始化标签页
   const initTabs = () => {
+    // 注释掉持久化功能 - 每次刷新都从固定标签开始
     // 从localStorage加载标签页
-    const savedTabs = localStorage.getItem('visitedViews')
-    if (savedTabs) {
-      try {
-        const parsedTabs = JSON.parse(savedTabs)
-        // 过滤掉无效的标签页
-        visitedViews.value = parsedTabs.filter(tab => 
-          tab.path && tab.meta && tab.meta.title
-        )
-      } catch (error) {
-        console.error('Failed to parse saved tabs:', error)
-        visitedViews.value = [...affixTags]
-      }
-    } else {
-      // 默认只显示固定标签
-      visitedViews.value = [...affixTags]
-    }
+    // const savedTabs = localStorage.getItem('visitedViews')
+    // if (savedTabs) {
+    //   try {
+    //     const parsedTabs = JSON.parse(savedTabs)
+    //     // 过滤掉无效的标签页
+    //     visitedViews.value = parsedTabs.filter(tab => 
+    //       tab.path && tab.meta && tab.meta.title
+    //     )
+    //   } catch (error) {
+    //     console.error('Failed to parse saved tabs:', error)
+    //     visitedViews.value = [...affixTags]
+    //   }
+    // } else {
+    //   // 默认只显示固定标签
+    //   visitedViews.value = [...affixTags]
+    // }
+    
+    // 不启用持久化，每次刷新都从固定标签开始
+    visitedViews.value = [...affixTags]
   }
 
   // 添加标签页
@@ -83,13 +87,13 @@ export const useTabsStore = defineStore('tabs', () => {
     return affixTags.some(affix => affix.path === view.path)
   }
 
-  // 保存到localStorage
-  const saveTabs = () => {
-    localStorage.setItem('visitedViews', JSON.stringify(visitedViews.value))
-  }
+  // 保存到localStorage - 注释掉持久化功能
+  // const saveTabs = () => {
+  //   localStorage.setItem('visitedViews', JSON.stringify(visitedViews.value))
+  // }
 
-  // 监听标签页变化，自动保存到localStorage
-  watch(visitedViews, saveTabs, { deep: true })
+  // 监听标签页变化，自动保存到localStorage - 注释掉持久化功能
+  // watch(visitedViews, saveTabs, { deep: true })
 
   return {
     visitedViews,

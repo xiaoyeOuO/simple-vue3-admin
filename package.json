@@ -15,7 +15,9 @@
     "gantt-schedule-timeline-calendar": "^3.41.1",
     "pinia": "^2.3.1",
     "vue": "^3.3.8",
-    "vue-router": "^4.2.5"
+    "vue-router": "^4.2.5",
+    "vxe-table": "^4.16.0",
+    "xe-utils": "^3.7.8"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.0",

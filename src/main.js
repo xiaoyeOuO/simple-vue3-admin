@@ -3,6 +3,8 @@ import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+import VXETable from 'vxe-table'
+import 'vxe-table/lib/style.css'
 import router from './router'
 import App from './App.vue'
 import './style.css'
@@ -16,6 +18,7 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 }
 
 app.use(ElementPlus)
+app.use(VXETable)
 app.use(router)
 app.use(pinia)
 app.mount('#app')

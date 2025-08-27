@@ -13,29 +13,30 @@
         <h3>项目基本信息</h3>
         <el-descriptions :column="2" border>
           <el-descriptions-item label="项目名称">{{ projectData.name }}</el-descriptions-item>
-          <el-descriptions-item label="项目编码">{{ projectData.code }}</el-descriptions-item>
-          <el-descriptions-item label="年度">{{ projectData.year }}</el-descriptions-item>
-          <el-descriptions-item label="区域">{{ projectData.area }}</el-descriptions-item>
+          <el-descriptions-item label="项目编号">{{ projectData.projectNo }}</el-descriptions-item>
+          <el-descriptions-item label="项目跟踪号">{{ projectData.tfn }}</el-descriptions-item>
+          <el-descriptions-item label="年度">{{ projectData.yaer }}</el-descriptions-item>
+          <el-descriptions-item label="业务类型">{{ projectData.business }}</el-descriptions-item>
+          <el-descriptions-item label="计划金额">{{ formatCurrency(projectData.amountPlan) }}</el-descriptions-item>
+          <el-descriptions-item label="项目地址">{{ projectData.address }}</el-descriptions-item>
           <el-descriptions-item label="状态">
-            <el-tag :type="getStatusTagType(projectData.status)">
-              {{ projectData.statusName }}
+            <el-tag :type="getStateTagType(projectData.state)">
+              {{ projectData.state }}
             </el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="阶段">
-            <el-tag :type="getPhaseTagType(projectData.phase)">
-              {{ projectData.phaseName }}
+            <el-tag :type="getStageTagType(projectData.stage)">
+              {{ projectData.stage }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="重要程度">
-            <el-tag :type="getImportantTagType(projectData.important)">
-              {{ projectData.importantName }}
+          <el-descriptions-item label="重要事项">
+            <el-tag :type="projectData.isMatter ? 'danger' : 'info'">
+              {{ projectData.isMatter ? '是' : '否' }}
             </el-tag>
           </el-descriptions-item>
-          <el-descriptions-item label="业务板块">{{ projectData.segmentName }}</el-descriptions-item>
-          <el-descriptions-item label="承包商">{{ projectData.coName }}</el-descriptions-item>
-          <el-descriptions-item label="负责人">{{ projectData.assignName }}</el-descriptions-item>
-          <el-descriptions-item label="填报人">{{ projectData.reporterName }}</el-descriptions-item>
-          <el-descriptions-item label="创建时间">{{ projectData.createTime || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="计划完成时间">{{ formatDate(projectData.doneTimePlan) }}</el-descriptions-item>
+          <el-descriptions-item label="合同主体">{{ projectData.contractEntity }}</el-descriptions-item>
+          <el-descriptions-item label="创建时间">{{ formatDateTime(projectData.createTime) || '-' }}</el-descriptions-item>
         </el-descriptions>
       </div>
 
@@ -131,19 +132,42 @@ const visible = computed({
 })
 
 // 标签类型方法
-const getStatusTagType = (status) => {
-  const map = { 1: 'primary', 2: 'success', 3: 'warning', 4: 'danger' }
-  return map[status] || 'info'
+const getStateTagType = (state) => {
+  const map = {
+    '进行中': 'primary',
+    '已完成': 'success',
+    '已暂停': 'warning',
+    '已取消': 'danger',
+    '待启动': 'info'
+  }
+  return map[state] || 'info'
 }
 
-const getPhaseTagType = (phase) => {
-  const map = { 1: 'info', 2: 'primary', 3: 'warning', 4: 'success' }
-  return map[phase] || 'info'
+const getStageTagType = (stage) => {
+  const map = {
+    '立项阶段': 'info',
+    '实施阶段': 'primary',
+    '验收阶段': 'warning',
+    '完成阶段': 'success',
+    '维护阶段': 'success'
+  }
+  return map[stage] || 'info'
 }
 
-const getImportantTagType = (important) => {
-  const map = { 1: 'info', 2: 'warning', 3: 'danger' }
-  return map[important] || 'info'
+// 格式化函数
+const formatCurrency = (value) => {
+  if (!value && value !== 0) return '-'
+  return `¥${Number(value).toLocaleString('zh-CN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+}
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleDateString('zh-CN')
+}
+
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleString('zh-CN')
 }
 
 const getTimelineType = (trackType) => {
@@ -165,6 +189,26 @@ const fetchTrackingData = async (projectId) => {
     // 模拟API延迟
     await new Promise(resolve => setTimeout(resolve, 800))
     
+    // 模拟数据 - 基于数据库字段结构
+    const mockProjectDetail = {
+      id: 'BP-2024-001',
+      name: '智慧园区建设项目',
+      projectNo: 'BP-2024-001',
+      tfn: 'TFN-2024-001',
+      yaer: '2024',
+      business: '智慧建筑',
+      amountPlan: 5000000.00,
+      address: '北京市朝阳区科技园A座',
+      state: '进行中',
+      stage: '实施阶段',
+      isMatter: true,
+      doneTimePlan: '2024-12-31',
+      contractEntity: '北京建工集团有限公司',
+      createTime: '2024-01-15 09:30:00',
+      createId: 1001,
+      isDelete: false
+    }
+
     // 模拟数据 - 根据项目ID获取跟踪信息
     const mockTrackingData = [
       {
@@ -236,9 +280,9 @@ const fillProjectData = (data) => {
 
 // 抽屉打开时
 const handleOpen = () => {
-  if (props.data && props.data.id) {
+  if (props.data && props.data.projectNo) {
     fillProjectData(props.data)
-    fetchTrackingData(props.data.id)
+    fetchTrackingData(props.data.projectNo)
   }
 }
 
@@ -254,7 +298,7 @@ const handleClose = () => {
 watch(() => props.data, (newData) => {
   if (newData && props.visible) {
     fillProjectData(newData)
-    fetchTrackingData(newData.id)
+    fetchTrackingData(newData.projectNo)
   }
 })
 </script>

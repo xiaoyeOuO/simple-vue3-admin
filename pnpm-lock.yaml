@@ -29,6 +29,12 @@ importers:
       vue-router:
         specifier: ^4.2.5
         version: 4.5.1(vue@3.5.19)
+      vxe-table:
+        specifier: ^4.16.0
+        version: 4.16.0(vue@3.5.19)
+      xe-utils:
+        specifier: ^3.7.8
+        version: 3.7.8
     devDependencies:
       '@vitejs/plugin-vue':
         specifier: ^4.5.0
@@ -469,6 +475,11 @@ packages:
   '@vueuse/shared@9.13.0':
     resolution: {integrity: sha512-UrnhU+Cnufu4S6JLCPZnkWh0WwZGUp72ktOF2DFptMlOs3TOdVv8xJN53zhHGARmVOsz5KqOls09+J1NR6sBKw==}
 
+  '@vxe-ui/core@4.2.11':
+    resolution: {integrity: sha512-Cv0XKTGgFD+CD2MGixxM+k60Y3tFEJYErQj59tuPd0y0HuSFc7sQk0fuXdbcNgxZxtAi4zX3nsDk3kY+/HeAgQ==}
+    peerDependencies:
+      vue: ^3.2.0
+
   async-validator@4.2.5:
     resolution: {integrity: sha512-7HhHjtERjqlNbZtqNqy2rckN/SpOOlmDliet+lP7k+eKZEjPk3DgyeU9lIXLdeLz0uBbbVp+9Qdow9wJWgwwfg==}
 
@@ -493,6 +504,9 @@ packages:
     resolution: {integrity: sha512-pGjwhsmsp4kL2RTz08wcOlGN83otlqHeD/Z5T8GXZB+/YcpQ/dgo+lbU8ZsGxV0HIvqqxo9l7mqYwyYMD9bKDg==}
     engines: {node: '>=0.10'}
     hasBin: true
+
+  dom-zindex@1.0.6:
+    resolution: {integrity: sha512-FKWIhiU96bi3xpP9ewRMgANsoVmMUBnMnmpCT6dPMZOunVYJQmJhSRruoI0XSPoHeIif3kyEuiHbFrOJwEJaEA==}
 
   echarts@6.0.0:
     resolution: {integrity: sha512-Tte/grDQRiETQP4xz3iZWSvoHrkCQtwqd6hs+mifXcjrCuo2iKWbajFObuLJVBlDIJlOzgQPd1hsaKt/3+OMkQ==}
@@ -680,6 +694,15 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
+
+  vxe-pc-ui@4.9.2:
+    resolution: {integrity: sha512-oUX82h0CkniikZymVjbD4fPiWMv/Kk2YXBTBx3aVWAaF12Q+sY4FNTxGyy+BJy0VNLMdVJe8/3UZJ3/JeqYJFA==}
+
+  vxe-table@4.16.0:
+    resolution: {integrity: sha512-v8QXR9mB9jnCRINO5eenJQwKJ0ZGaZM7bFv4Iv5r/quV1OvY+8rVlOXqPH14vWK4MeuhnWUAE2vVxqx7XdhkDg==}
+
+  xe-utils@3.7.8:
+    resolution: {integrity: sha512-V/k6B/ASYir6yLYhp62DnM17po9u1N9mou/rn4if5WoFCsAO49JpCiVpkDpwCv4zxGfWmhWgzmz4FytWF+pDVw==}
 
   zrender@6.0.0:
     resolution: {integrity: sha512-41dFXEEXuJpNecuUQq6JlbybmnHaqqpGlbH1yxnA5V9MMP4SbohSVZsJIwz+zdjQXSSlR1Vc34EgH1zxyTDvhg==}
@@ -1006,6 +1029,12 @@ snapshots:
       - '@vue/composition-api'
       - vue
 
+  '@vxe-ui/core@4.2.11(vue@3.5.19)':
+    dependencies:
+      dom-zindex: 1.0.6
+      vue: 3.5.19
+      xe-utils: 3.7.8
+
   async-validator@4.2.5: {}
 
   braces@3.0.3:
@@ -1025,6 +1054,8 @@ snapshots:
 
   detect-libc@1.0.3:
     optional: true
+
+  dom-zindex@1.0.6: {}
 
   echarts@6.0.0:
     dependencies:
@@ -1233,6 +1264,20 @@ snapshots:
       '@vue/runtime-dom': 3.5.19
       '@vue/server-renderer': 3.5.19(vue@3.5.19)
       '@vue/shared': 3.5.19
+
+  vxe-pc-ui@4.9.2(vue@3.5.19):
+    dependencies:
+      '@vxe-ui/core': 4.2.11(vue@3.5.19)
+    transitivePeerDependencies:
+      - vue
+
+  vxe-table@4.16.0(vue@3.5.19):
+    dependencies:
+      vxe-pc-ui: 4.9.2(vue@3.5.19)
+    transitivePeerDependencies:
+      - vue
+
+  xe-utils@3.7.8: {}
 
   zrender@6.0.0:
     dependencies:

@@ -6,22 +6,34 @@
         <el-form-item label="项目名称">
           <el-input v-model="searchForm.name" placeholder="请输入项目名称" clearable />
         </el-form-item>
-        <el-form-item label="项目编码">
-          <el-input v-model="searchForm.code" placeholder="请输入项目编码" clearable />
+        <el-form-item label="项目编号">
+          <el-input v-model="searchForm.projectNo" placeholder="请输入项目编号" clearable />
+        </el-form-item>
+        <el-form-item label="项目跟踪号">
+          <el-input v-model="searchForm.tfn" placeholder="请输入项目跟踪号" clearable />
         </el-form-item>
         <el-form-item label="年度">
-          <el-select v-model="searchForm.year" placeholder="请选择年度" clearable>
+          <el-select v-model="searchForm.yaer" placeholder="请选择年度" clearable>
             <el-option v-for="year in yearOptions" :key="year" :label="year" :value="year" />
           </el-select>
         </el-form-item>
+        <el-form-item label="业务类型">
+          <el-input v-model="searchForm.business" placeholder="请输入业务类型" clearable />
+        </el-form-item>
         <el-form-item label="状态">
-          <el-select v-model="searchForm.status" placeholder="请选择状态" clearable>
-            <el-option v-for="item in statusOptions" :key="item.value" :label="item.label" :value="item.value" />
+          <el-select v-model="searchForm.state" placeholder="请选择状态" clearable>
+            <el-option v-for="item in stateOptions" :key="item" :label="item" :value="item" />
           </el-select>
         </el-form-item>
-        <el-form-item label="重要程度">
-          <el-select v-model="searchForm.important" placeholder="请选择重要程度" clearable>
-            <el-option v-for="item in importantOptions" :key="item.value" :label="item.label" :value="item.value" />
+        <el-form-item label="阶段">
+          <el-select v-model="searchForm.stage" placeholder="请选择阶段" clearable>
+            <el-option v-for="item in stageOptions" :key="item" :label="item" :value="item" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="重要事项">
+          <el-select v-model="searchForm.isMatter" placeholder="请选择" clearable>
+            <el-option label="是" :value="true" />
+            <el-option label="否" :value="false" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -42,53 +54,67 @@
     <!-- 数据表格 -->
     <div class="data-table">
       <el-table :data="tableData" border stripe style="width: 100%">
-        <el-table-column type="index" label="序号" width="60" align="center" />
-        <el-table-column prop="name" label="项目名称" min-width="180" show-overflow-tooltip />
-        <el-table-column prop="code" label="项目编码" min-width="120" />
-        <el-table-column prop="year" label="年度" width="80" align="center" />
-        <el-table-column prop="area" label="区域" min-width="120" />
-        <el-table-column prop="phaseName" label="阶段" width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="getPhaseTagType(row.phase)">
-              {{ row.phaseName }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="statusName" label="状态" width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="getStatusTagType(row.status)">
-              {{ row.statusName }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="importantName" label="重要程度" width="100" align="center">
-          <template #default="{ row }">
-            <el-tag :type="getImportantTagType(row.important)">
-              {{ row.importantName }}
-            </el-tag>
-          </template>
-        </el-table-column>
-        <el-table-column prop="segmentName" label="业务板块" min-width="120" />
-        <el-table-column prop="coName" label="承包商" min-width="150" show-overflow-tooltip />
-        <el-table-column prop="assignName" label="负责人" width="100" />
-        <el-table-column prop="reporterName" label="填报人" width="100" />
-        <el-table-column label="操作" width="280" fixed="right" align="center">
-          <template #default="{ row }">
-            <el-button type="primary" link @click="handleDetail(row)">
-              <el-icon><View /></el-icon>
-              详情
-            </el-button>
-            <el-button type="primary" link @click="handleEdit(row)">
-              <el-icon><Edit /></el-icon>
-              编辑
-            </el-button>
-            <el-button type="danger" link @click="handleDelete(row)">
-              <el-icon><Delete /></el-icon>
-              删除
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+          <el-table-column type="index" label="序号" width="60" align="center" />
+          <el-table-column prop="name" label="项目名称" min-width="200" show-overflow-tooltip />
+          <el-table-column prop="projectNo" label="项目编号" min-width="150" />
+          <el-table-column prop="tfn" label="项目跟踪号" min-width="120" />
+          <el-table-column prop="yaer" label="年度" width="80" align="center" />
+          <el-table-column prop="business" label="业务类型" min-width="120" />
+          <el-table-column prop="amountPlan" label="计划金额" width="120" align="right">
+            <template #default="{ row }">
+              ¥{{ formatAmount(row.amountPlan) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="address" label="项目地址" min-width="200" show-overflow-tooltip />
+          <el-table-column prop="state" label="状态" width="100" align="center">
+            <template #default="{ row }">
+              <el-tag :type="getStateTagType(row.state)">
+                {{ row.state }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="stage" label="阶段" width="100" align="center">
+            <template #default="{ row }">
+              <el-tag :type="getStageTagType(row.stage)">
+                {{ row.stage }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="isMatter" label="重要事项" width="80" align="center">
+            <template #default="{ row }">
+              <el-tag :type="row.isMatter ? 'danger' : 'info'">
+                {{ row.isMatter ? '是' : '否' }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="doneTimePlan" label="计划完成时间" width="120">
+            <template #default="{ row }">
+              {{ formatDate(row.doneTimePlan) }}
+            </template>
+          </el-table-column>
+          <el-table-column prop="contractEntity" label="合同主体" min-width="150" show-overflow-tooltip />
+          <el-table-column prop="createTime" label="创建时间" width="150">
+            <template #default="{ row }">
+              {{ formatDateTime(row.createTime) }}
+            </template>
+          </el-table-column>
+          <el-table-column label="操作" width="220" fixed="right" align="center">
+            <template #default="{ row }">
+              <el-button type="primary" link @click="handleDetail(row)">
+                <el-icon><View /></el-icon>
+                详情
+              </el-button>
+              <el-button type="primary" link @click="handleEdit(row)">
+                <el-icon><Edit /></el-icon>
+                编辑
+              </el-button>
+              <el-button type="danger" link @click="handleDelete(row)" :disabled="row.isDelete">
+                <el-icon><Delete /></el-icon>
+                删除
+              </el-button>
+            </template>
+          </el-table-column>
+        </el-table>
     </div>
 
     <!-- 分页 -->
@@ -130,10 +156,13 @@ import BusinessProjectDetail from './detail.vue'
 // 搜索表单
 const searchForm = reactive({
   name: '',
-  code: '',
-  year: '',
-  status: '',
-  important: ''
+  projectNo: '',
+  tfn: '',
+  yaer: '',
+  business: '',
+  state: '',
+  stage: '',
+  isMatter: ''
 })
 
 // 表格数据
@@ -153,109 +182,110 @@ const currentRow = ref(null)
 const editMode = ref('add')
 
 // 选项数据
-const yearOptions = ['2024', '2023', '2022', '2021']
-const statusOptions = [
-  { value: 1, label: '进行中' },
-  { value: 2, label: '已完成' },
-  { value: 3, label: '已暂停' },
-  { value: 4, label: '已取消' }
-]
-const importantOptions = [
-  { value: 1, label: '一般' },
-  { value: 2, label: '重要' },
-  { value: 3, label: '非常重要' }
-]
+const yearOptions = ['2024', '2023', '2022', '2021', '2020']
+const stateOptions = ['进行中', '已完成', '已暂停', '已取消', '待启动']
+const stageOptions = ['立项阶段', '实施阶段', '验收阶段', '完成阶段', '维护阶段']
 
-// 模拟数据 - 基于提供的数据结构
+// 模拟数据 - 基于数据库字段结构
 const mockData = [
   {
-    id: 1,
-    moduleId: 'MOD-001',
+    id: 'BP-2024-001',
     name: '智慧园区建设项目',
-    code: 'BP-2024-001',
-    year: '2024',
-    areaCode: 'BJ',
-    area: '北京市',
-    provinceCode: '110000',
-    cityCode: '110100',
-    status: 1,
-    statusName: '进行中',
-    phase: 2,
-    phaseName: '实施阶段',
-    important: 3,
-    importantName: '非常重要',
-    segment: 1,
-    segmentName: '智慧建筑',
-    contractor: '北京建工集团',
-    coId: 'CO-001',
-    coName: '北京建工集团有限公司',
-    coTin: '91110000101361123Y',
-    coMemberId: 'M-001',
-    coMemberName: '张经理',
-    coMemberTel: '13800138001',
-    assignId: 'A-001',
-    assignName: '李主管',
-    instanceStatus: 2,
-    instanceStatusName: '已审批',
-    deptId: 'DEPT-001',
-    deptName: '项目管理部',
-    reporterId: 'R-001',
-    reporterName: '王工程师',
-    reporterDeptId: 'DEPT-002',
-    reviewBool: true
+    projectNo: 'BP-2024-001',
+    tfn: 'TFN-2024-001',
+    yaer: '2024',
+    business: '智慧建筑',
+    amountPlan: 5000000.00,
+    address: '北京市朝阳区科技园A座',
+    state: '进行中',
+    stage: '实施阶段',
+    isMatter: true,
+    doneTimePlan: '2024-12-31',
+    contractEntity: '北京建工集团有限公司',
+    createTime: '2024-01-15 09:30:00',
+    createId: 1001,
+    isDelete: false
   },
   {
-    id: 2,
-    moduleId: 'MOD-002',
+    id: 'BP-2024-002',
     name: '城市更新改造项目',
-    code: 'BP-2024-002',
-    year: '2024',
-    areaCode: 'SH',
-    area: '上海市',
-    provinceCode: '310000',
-    cityCode: '310100',
-    status: 2,
-    statusName: '已完成',
-    phase: 4,
-    phaseName: '验收阶段',
-    important: 2,
-    importantName: '重要',
-    segment: 2,
-    segmentName: '市政工程',
-    contractor: '上海城建集团',
-    coId: 'CO-002',
-    coName: '上海城建集团有限公司',
-    coTin: '91310000132222888X',
-    coMemberId: 'M-002',
-    coMemberName: '刘经理',
-    coMemberTel: '13900139002',
-    assignId: 'A-002',
-    assignName: '赵主管',
-    instanceStatus: 2,
-    instanceStatusName: '已审批',
-    deptId: 'DEPT-003',
-    deptName: '市政工程部',
-    reporterId: 'R-002',
-    reporterName: '陈工程师',
-    reporterDeptId: 'DEPT-004',
-    reviewBool: false
+    projectNo: 'BP-2024-002',
+    tfn: 'TFN-2024-002',
+    yaer: '2024',
+    business: '市政工程',
+    amountPlan: 12000000.50,
+    address: '上海市浦东新区世纪大道100号',
+    state: '已完成',
+    stage: '验收阶段',
+    isMatter: false,
+    doneTimePlan: '2024-10-15',
+    contractEntity: '上海城建集团有限公司',
+    createTime: '2024-02-20 14:45:00',
+    createId: 1002,
+    isDelete: false
+  },
+  {
+    id: 'BP-2024-003',
+    name: '智慧交通系统升级',
+    projectNo: 'BP-2024-003',
+    tfn: 'TFN-2024-003',
+    yaer: '2023',
+    business: '交通工程',
+    amountPlan: 8500000.75,
+    address: '深圳市南山区科技园',
+    state: '进行中',
+    stage: '立项阶段',
+    isMatter: true,
+    doneTimePlan: '2025-03-30',
+    contractEntity: '深圳市交通建设集团',
+    createTime: '2023-11-10 08:20:00',
+    createId: 1003,
+    isDelete: false
   }
 ]
 
 // 标签类型方法
-const getStatusTagType = (status) => {
-  const map = { 1: 'primary', 2: 'success', 3: 'warning', 4: 'danger' }
-  return map[status] || 'info'
+const getStateTagType = (state) => {
+  const map = {
+    '进行中': 'primary',
+    '已完成': 'success',
+    '已暂停': 'warning',
+    '已取消': 'danger',
+    '待启动': 'info'
+  }
+  return map[state] || 'info'
 }
 
-const getImportantTagType = (important) => {
-  const map = { 1: 'info', 2: 'warning', 3: 'danger' }
-  return map[important] || 'info'
+const getStageTagType = (stage) => {
+  const map = {
+    '立项阶段': 'info',
+    '实施阶段': 'primary',
+    '验收阶段': 'warning',
+    '完成阶段': 'success',
+    '维护阶段': 'success'
+  }
+  return map[stage] || 'info'
 }
 
-const getPhaseTagType = (phase) => {
-  const map = { 1: 'info', 2: 'primary', 3: 'warning', 4: 'success' }
-  return map[phase] || 'info'
+// 格式化函数
+const formatAmount = (amount) => {
+  if (amount === null || amount === undefined) return '0.00'
+  return Number(amount).toLocaleString('zh-CN', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('zh-CN')
+}
+
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleString('zh-CN')
 }
 
 // 获取列表数据
@@ -268,22 +298,38 @@ const fetchData = () => {
     )
   }
   
-  if (searchForm.code) {
+  if (searchForm.projectNo) {
     filteredData = filteredData.filter(item => 
-      item.code.toLowerCase().includes(searchForm.code.toLowerCase())
+      item.projectNo.toLowerCase().includes(searchForm.projectNo.toLowerCase())
     )
   }
   
-  if (searchForm.year) {
-    filteredData = filteredData.filter(item => item.year === searchForm.year)
+  if (searchForm.tfn) {
+    filteredData = filteredData.filter(item => 
+      item.tfn.toLowerCase().includes(searchForm.tfn.toLowerCase())
+    )
   }
   
-  if (searchForm.status !== '') {
-    filteredData = filteredData.filter(item => item.status === parseInt(searchForm.status))
+  if (searchForm.yaer) {
+    filteredData = filteredData.filter(item => item.yaer === searchForm.yaer)
   }
   
-  if (searchForm.important !== '') {
-    filteredData = filteredData.filter(item => item.important === parseInt(searchForm.important))
+  if (searchForm.business) {
+    filteredData = filteredData.filter(item => 
+      item.business.toLowerCase().includes(searchForm.business.toLowerCase())
+    )
+  }
+  
+  if (searchForm.state) {
+    filteredData = filteredData.filter(item => item.state === searchForm.state)
+  }
+  
+  if (searchForm.stage) {
+    filteredData = filteredData.filter(item => item.stage === searchForm.stage)
+  }
+  
+  if (searchForm.isMatter !== '') {
+    filteredData = filteredData.filter(item => item.isMatter === searchForm.isMatter)
   }
   
   pagination.total = filteredData.length
@@ -302,10 +348,13 @@ const handleSearch = () => {
 // 重置
 const handleReset = () => {
   searchForm.name = ''
-  searchForm.code = ''
-  searchForm.year = ''
-  searchForm.status = ''
-  searchForm.important = ''
+  searchForm.projectNo = ''
+  searchForm.tfn = ''
+  searchForm.yaer = ''
+  searchForm.business = ''
+  searchForm.state = ''
+  searchForm.stage = ''
+  searchForm.isMatter = ''
   handleSearch()
 }
 
@@ -354,7 +403,7 @@ const handleDelete = async (row) => {
     )
     
     // 模拟删除操作
-    const index = mockData.findIndex(item => item.id === row.id)
+    const index = mockData.findIndex(item => item.projectNo === row.projectNo)
     if (index > -1) {
       mockData.splice(index, 1)
     }
