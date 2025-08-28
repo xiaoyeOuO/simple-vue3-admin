@@ -123,6 +123,20 @@ const routes = [
             meta: { title: '客商联系人', icon: 'Phone' }
           }
         ]
+      },
+      {
+        path: '/coding',
+        name: 'Coding',
+        meta: { title: '开发管理', icon: 'Code' },
+        redirect: '/coding/projectConfig',
+        children: [
+          {
+            path: '/coding/projectConfig',
+            name: 'ProjectConfig',
+            component: () => import('@/views/coding/projectConfig/index.vue'),
+            meta: { title: '项目任务配置', icon: 'Setting' }
+          }
+        ]
       }
     ]
   },
