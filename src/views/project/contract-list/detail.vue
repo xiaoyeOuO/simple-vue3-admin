@@ -106,33 +106,51 @@
               </el-button>
             </div>
             
-            <el-table :data="tasksData" border stripe style="width: 100%">
-              <el-table-column type="index" label="序号" width="60" align="center" />
-              <el-table-column prop="title" label="任务标题" min-width="200" />
-              <el-table-column prop="moduleName" label="所属模块" min-width="150" />
-              <el-table-column prop="assignee" label="负责人" width="120" />
-              <el-table-column prop="priority" label="优先级" width="100" align="center">
+            <vxe-table
+              :data="tasksData"
+              border
+              stripe
+              row-key
+              :tree-config="{ children: 'children', expandAll: true }"
+              height="500"
+            >
+              <vxe-column type="seq" title="序号" width="60" align="center" tree-node />
+              <vxe-column field="title" title="任务标题" min-width="200" tree-node />
+              <vxe-column field="moduleName" title="所属模块" min-width="150" />
+              <vxe-column field="typeName" title="任务类型" width="100" align="center">
                 <template #default="{ row }">
-                  <el-tag :type="getPriorityType(row.priority)">
+                  <el-tag type="info" size="small">
+                    {{ row.typeName }}
+                  </el-tag>
+                </template>
+              </vxe-column>
+              <vxe-column field="assignee" title="处理人" width="120" />
+              <vxe-column field="priority" title="优先级" width="100" align="center">
+                <template #default="{ row }">
+                  <el-tag :type="getPriorityType(row.priority)" size="small">
                     {{ row.priorityName }}
                   </el-tag>
                 </template>
-              </el-table-column>
-              <el-table-column prop="status" label="状态" width="100" align="center">
+              </vxe-column>
+              <vxe-column field="status" title="状态" width="100" align="center">
                 <template #default="{ row }">
-                  <el-tag :type="getTaskStatusType(row.status)">
+                  <el-tag :type="getTaskStatusType(row.status)" size="small">
                     {{ row.statusName }}
                   </el-tag>
                 </template>
-              </el-table-column>
-              <el-table-column prop="startDate" label="开始时间" width="120" />
-              <el-table-column prop="dueDate" label="截止时间" width="120" />
-              <el-table-column prop="progress" label="完成进度" width="100" align="center">
+              </vxe-column>
+              <vxe-column field="startDate" title="开始时间" width="120" />
+              <vxe-column field="endDate" title="结束时间" width="120" />
+              <vxe-column field="progress" title="完成进度" width="100" align="center">
                 <template #default="{ row }">
-                  {{ row.progress }}%
+                  <el-progress 
+                    :percentage="row.progress" 
+                    :status="getProgressStatus(row.progress)"
+                    :stroke-width="12"
+                  />
                 </template>
-              </el-table-column>
-              <el-table-column label="操作" width="150" fixed="right" align="center">
+              </vxe-column>
+              <vxe-column title="操作" width="150" fixed="right" align="center">
                 <template #default="{ row }">
                   <el-button type="primary" link @click="handleEditTask(row)">
                     <el-icon><Edit /></el-icon>
@@ -143,8 +161,8 @@
                     删除
                   </el-button>
                 </template>
-              </el-table-column>
-            </el-table>
+              </vxe-column>
+            </vxe-table>
           </div>
         </el-tab-pane>
 
@@ -214,6 +232,16 @@
     :project-id="projectId"
     @success="handleModuleSuccess"
   />
+
+  <!-- 任务编辑抽屉 -->
+  <task-edit
+    v-model:visible="taskEditVisible"
+    :data="currentTask"
+    :mode="taskEditMode"
+    :project-id="projectId"
+    :module-tree-data="modulesData"
+    @success="handleTaskSuccess"
+  />
 </template>
 
 <script setup>
@@ -222,6 +250,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, Folder, Document } from '@element-plus/icons-vue'
 import ModuleEdit from './moduleEdit.vue'
+import TaskEdit from './taskEdit.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -255,6 +284,11 @@ const projectInfo = ref({
 const moduleEditVisible = ref(false)
 const moduleEditMode = ref('add')
 const currentModule = ref(null)
+
+// 任务编辑控制
+const taskEditVisible = ref(false)
+const taskEditMode = ref('add')
+const currentTask = ref(null)
 
 // 模块数据（树形结构）
 const modulesData = ref([
@@ -318,33 +352,106 @@ const modulesData = ref([
   }
 ])
 
-// 任务数据
+// 任务数据（树形结构）
 const tasksData = ref([
   {
     id: 1,
     title: '楼宇自动化系统开发',
     moduleName: '智能楼宇系统',
     assignee: '王工程师',
+    assigneeUserId: 2,
     priority: 1,
     priorityName: '高',
     status: 2,
     statusName: '进行中',
     startDate: '2024-01-20',
+    endDate: '2024-03-20',
     dueDate: '2024-03-20',
-    progress: 60
+    progress: 60,
+    typeKey: 1,
+    typeName: '需求开发',
+    parentId: null,
+    content: '开发楼宇自动化系统的核心功能模块',
+    children: [
+      {
+        id: 11,
+        title: 'HVAC控制模块开发',
+        moduleName: '智能楼宇系统',
+        assignee: '张开发',
+        assigneeUserId: 4,
+        priority: 1,
+        priorityName: '高',
+        status: 2,
+        statusName: '进行中',
+        startDate: '2024-01-20',
+        endDate: '2024-02-15',
+        dueDate: '2024-02-15',
+        progress: 80,
+        typeKey: 1,
+        typeName: '需求开发',
+        parentId: 1,
+        content: '开发HVAC温湿度控制模块'
+      },
+      {
+        id: 12,
+        title: '照明控制模块开发',
+        moduleName: '智能楼宇系统',
+        assignee: '李开发',
+        assigneeUserId: 5,
+        priority: 2,
+        priorityName: '中',
+        status: 1,
+        statusName: '待开始',
+        startDate: '2024-01-25',
+        endDate: '2024-02-20',
+        dueDate: '2024-02-20',
+        progress: 0,
+        typeKey: 1,
+        typeName: '需求开发',
+        parentId: 1,
+        content: '开发智能照明控制模块'
+      }
+    ]
   },
   {
     id: 2,
     title: '监控摄像头安装',
     moduleName: '安防监控系统',
     assignee: '李技术员',
+    assigneeUserId: 3,
     priority: 2,
     priorityName: '中',
     status: 1,
     statusName: '待开始',
     startDate: '2024-02-01',
+    endDate: '2024-04-01',
     dueDate: '2024-04-01',
-    progress: 0
+    progress: 0,
+    typeKey: 3,
+    typeName: '测试任务',
+    parentId: null,
+    content: '完成监控摄像头的安装和调试工作',
+    children: [
+      {
+        id: 21,
+        title: '摄像头点位勘察',
+        moduleName: '安防监控系统',
+        assignee: '王勘察',
+        assigneeUserId: 6,
+        priority: 1,
+        priorityName: '高',
+        status: 2,
+        statusName: '进行中',
+        startDate: '2024-02-01',
+        endDate: '2024-02-10',
+        dueDate: '2024-02-10',
+        progress: 50,
+        typeKey: 2,
+        typeName: '调研任务',
+        parentId: 2,
+        content: '完成所有摄像头安装点位的现场勘察'
+      }
+    ]
   }
 ])
 
@@ -397,12 +504,24 @@ const getModuleStatusType = (status) => {
 }
 
 const getTaskStatusType = (status) => {
-  const map = { 1: 'info', 2: 'primary', 3: 'success', 4: 'warning', 5: 'danger' }
+  const map = { 
+    1: 'info',      // 待开始
+    2: 'primary',   // 进行中
+    3: 'success',   // 已完成
+    4: 'warning',   // 已暂停
+    5: 'danger'     // 已取消
+  }
   return map[status] || 'info'
 }
 
 const getBugStatusType = (status) => {
-  const map = { 1: 'info', 2: 'primary', 3: 'success', 4: 'warning', 5: 'danger' }
+  const map = { 
+    1: 'info',      // 新建
+    2: 'primary',   // 处理中
+    3: 'success',   // 已解决
+    4: 'warning',   // 重新打开
+    5: 'danger'     // 已关闭
+  }
   return map[status] || 'info'
 }
 
@@ -569,15 +688,56 @@ const handleModuleSuccess = (moduleData) => {
 
 // 任务操作
 const handleAddTask = () => {
-  ElMessage.success('新增任务功能待实现')
+  taskEditMode.value = 'add'
+  currentTask.value = null
+  taskEditVisible.value = true
 }
 
 const handleEditTask = (row) => {
-  ElMessage.success(`编辑任务：${row.title}`)
+  taskEditMode.value = 'edit'
+  currentTask.value = row
+  taskEditVisible.value = true
 }
 
-const handleDeleteTask = (row) => {
-  ElMessage.success(`删除任务：${row.title}`)
+const handleDeleteTask = async (row) => {
+  try {
+    await ElMessageBox.confirm(
+      `确认删除任务 "${row.title}" 吗？删除后无法恢复。`,
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    // 模拟删除操作
+    const index = tasksData.value.findIndex(task => task.id === row.id)
+    if (index > -1) {
+      tasksData.value.splice(index, 1)
+      ElMessage.success('删除成功')
+    }
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
+  }
+}
+
+// 任务编辑成功回调
+const handleTaskSuccess = (taskData) => {
+  if (taskEditMode.value === 'add') {
+    // 新增任务
+    tasksData.value.push(taskData)
+  } else {
+    // 编辑任务
+    const index = tasksData.value.findIndex(task => task.id === taskData.id)
+    if (index > -1) {
+      tasksData.value[index] = { ...tasksData.value[index], ...taskData }
+    }
+  }
+  
+  ElMessage.success(taskEditMode.value === 'add' ? '创建成功' : '更新成功')
 }
 
 // 缺陷操作
