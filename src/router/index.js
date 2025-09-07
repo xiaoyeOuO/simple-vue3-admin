@@ -35,6 +35,18 @@ const routes = [
             name: 'Menu',
             meta: { title: '菜单管理', icon: 'Menu' },
             component: () => import('@/views/system/Menu.vue')
+          },
+          {
+            path: '/system/const',
+            name: 'Const',
+            meta: { title: '字典管理', icon: 'Collection' },
+            component: () => import('@/views/system/const/index.vue')
+          },
+          {
+            path: '/system/worktime',
+            name: 'Worktime',
+            meta: { title: '工时管理', icon: 'Clock' },
+            component: () => import('@/views/system/worktime/index.vue')
           }
         ]
       },
@@ -94,13 +106,37 @@ const routes = [
         path: '/report',
         name: 'Report',
         meta: { title: '数据洞察中心', icon: 'DataAnalysis' },
-        redirect: '/report/config',
+        redirect: '/report/index',
         children: [
+          {
+            path: '/report/index',
+            name: 'ReportIndex',
+            component: () => import('@/views/report/index.vue'),
+            meta: { title: '日报管理', icon: 'Document' }
+          },
+          {
+            path: '/report/todo',
+            name: 'ReportTodo',
+            component: () => import('@/views/report/todo/index.vue'),
+            meta: { title: '我的待办', icon: 'List' }
+          },
           {
             path: '/report/config',
             name: 'ReportConfig',
             component: () => import('@/views/report/config/index.vue'),
             meta: { title: '日报月报配置', icon: 'Setting' }
+          },
+          {
+            path: '/report/fill/:id',
+            name: 'ReportFill',
+            component: () => import('@/views/report/fill/index.vue'),
+            meta: { title: '填写报表', icon: 'Edit', hidden: true }
+          },
+          {
+            path: '/report/instance/:id',
+            name: 'ReportInstance',
+            component: () => import('@/views/report/instance/index.vue'),
+            meta: { title: '实例管理', icon: 'Monitor', hidden: true }
           }
         ]
       },
@@ -131,11 +167,23 @@ const routes = [
         redirect: '/coding/projectConfig',
         children: [
           {
-            path: '/coding/projectConfig',
-            name: 'ProjectConfig',
-            component: () => import('@/views/coding/projectConfig/index.vue'),
-            meta: { title: '项目任务配置', icon: 'Setting' }
-          }
+        path: '/coding/projectConfig',
+        name: 'ProjectConfig',
+        component: () => import('@/views/coding/projectConfig/index.vue'),
+        meta: { title: '项目任务配置', icon: 'Setting' }
+      },
+      {
+        path: '/coding/modulePush',
+        name: 'ModulePush',
+        component: () => import('@/views/coding/modulePush/index.vue'),
+        meta: { title: '模块推送', icon: 'Promotion' }
+      },
+      {
+        path: '/coding/projectList',
+        name: 'ProjectList',
+        component: () => import('@/views/coding/projectList/index.vue'),
+        meta: { title: '项目列表管理', icon: 'List' }
+      }
         ]
       }
     ]

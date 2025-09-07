@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
+import router from '@/router'
 
 export const useTabsStore = defineStore('tabs', () => {
   // 访问过的标签页列表
@@ -95,6 +96,18 @@ export const useTabsStore = defineStore('tabs', () => {
   // 监听标签页变化，自动保存到localStorage - 注释掉持久化功能
   // watch(visitedViews, saveTabs, { deep: true })
 
+  // 关闭当前标签页
+  const closeCurrentView = () => {
+    return new Promise((resolve) => {
+      const currentRoute = router.currentRoute.value
+      if (currentRoute && !isAffix(currentRoute)) {
+        delView(currentRoute).then(resolve)
+      } else {
+        resolve([...visitedViews.value])
+      }
+    })
+  }
+
   return {
     visitedViews,
     affixTags,
@@ -103,6 +116,7 @@ export const useTabsStore = defineStore('tabs', () => {
     delView,
     delOthersViews,
     delAllViews,
-    isAffix
+    isAffix,
+    closeCurrentView
   }
 })

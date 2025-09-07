@@ -22,9 +22,9 @@
         </el-form-item>
         <el-form-item label="报表类型">
           <el-select v-model="searchForm.type" placeholder="请选择报表类型" clearable style="width: 150px">
-            <el-option label="日报" value="daily" />
-            <el-option label="周报" value="weekly" />
-            <el-option label="月报" value="monthly" />
+            <el-option label="日报" :value="1" />
+            <el-option label="周报" :value="2" />
+            <el-option label="月报" :value="3" />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -41,9 +41,9 @@
         <el-table-column prop="type" label="报表类型" width="100">
           <template #default="{ row }">
             <el-tag
-              :type="row.type === 'daily' ? 'success' : row.type === 'weekly' ? 'primary' : 'warning'"
+              :type="row.type === 1 ? 'success' : row.type === 2 ? 'primary' : 'warning'"
             >
-              {{ row.type === 'daily' ? '日报' : row.type === 'weekly' ? '周报' : '月报' }}
+              {{ row.type === 1 ? '日报' : row.type === 2 ? '周报' : '月报' }}
             </el-tag>
           </template>
         </el-table-column>
@@ -82,10 +82,14 @@
         <el-table-column prop="description" label="描述" min-width="200" />
         <el-table-column prop="createTime" label="创建时间" width="160" />
         <el-table-column prop="updateTime" label="更新时间" width="160" />
-        <el-table-column label="操作" width="200" fixed="right">
+        <el-table-column label="操作" width="280" fixed="right">
           <template #default="{ row }">
             <el-button type="primary" link :icon="Edit" @click="handleEdit(row)">
               编辑
+            </el-button>
+            <el-button type="success" link @click="handleInstanceManage(row)">
+              <el-icon><Monitor /></el-icon>
+              实例管理
             </el-button>
             <el-button type="danger" link :icon="Delete" @click="handleDelete(row)">
               删除
@@ -109,9 +113,11 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Plus, Search, Refresh, Edit, Delete } from '@element-plus/icons-vue'
+import { Plus, Search, Refresh, Edit, Delete, Monitor } from '@element-plus/icons-vue'
 import BusinessReportEdit from './edit.vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 // 搜索表单
 const searchForm = reactive({
   name: '',
@@ -183,7 +189,7 @@ const loadData = async () => {
       {
         id: 1,
         name: '产品线A日报配置',
-        type: 'daily',
+        type: 1,
         dimensions: ['product_line'],
         dimensionValues: {
           product_line: ['产品线A']
@@ -195,7 +201,7 @@ const loadData = async () => {
       {
         id: 2,
         name: '产品支线X月报配置',
-        type: 'monthly',
+        type: 3,
         dimensions: ['product_branch'],
         dimensionValues: {
           product_branch: ['产品支线X']
@@ -207,7 +213,7 @@ const loadData = async () => {
       {
         id: 3,
         name: '张三日报配置',
-        type: 'daily',
+        type: 1,
         dimensions: ['person'],
         dimensionValues: {
           person: ['张三']
@@ -219,7 +225,7 @@ const loadData = async () => {
       {
         id: 4,
         name: '研发一部产品线A项目X配置',
-        type: 'daily',
+        type: 1,
         dimensions: ['department', 'product_line', 'project'],
         dimensionValues: {
           department: ['研发一部'],
@@ -233,7 +239,7 @@ const loadData = async () => {
       {
         id: 5,
         name: '全产品线月报配置',
-        type: 'monthly',
+        type: 3,
         dimensions: ['product_line'],
         dimensionValues: {
           product_line: ['产品线A', '产品线B', '产品线C']
@@ -245,7 +251,7 @@ const loadData = async () => {
       {
         id: 6,
         name: '研发一部周报配置',
-        type: 'weekly',
+        type: 2,
         dimensions: ['department', 'product_line'],
         dimensionValues: {
           department: ['研发一部'],
@@ -258,7 +264,7 @@ const loadData = async () => {
       {
         id: 7,
         name: '项目X周报配置',
-        type: 'weekly',
+        type: 2,
         dimensions: ['project'],
         dimensionValues: {
           project: ['项目X']
@@ -339,6 +345,11 @@ const handleDelete = async (row) => {
 const handleEditSuccess = () => {
   editVisible.value = false
   loadData()
+}
+
+// 实例管理
+const handleInstanceManage = (row) => {
+  router.push(`/report/instance/${row.id}`)
 }
 
 // 分页变化
