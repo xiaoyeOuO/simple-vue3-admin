@@ -80,6 +80,42 @@
                 </template>
               </vxe-column>
               <vxe-column field="sort" title="排序" width="80" align="center" />
+              <vxe-column field="statistic.allCount" title="任务数" width="100" align="center">
+                <template #default="{ row }">
+                  <el-button 
+                    type="primary" 
+                    link 
+                    @click="showTaskDetailDialog(row)"
+                    :disabled="!row.statistic?.allCount"
+                  >
+                    {{ row.statistic?.allCount || 0 }}
+                  </el-button>
+                </template>
+              </vxe-column>
+              <vxe-column field="statistic.allWorkingHours" title="工作记录时长" width="120" align="center">
+                <template #default="{ row }">
+                  <el-button 
+                    type="primary" 
+                    link 
+                    @click="showWorkingHoursDialog(row)"
+                    :disabled="!row.statistic?.allWorkingHours"
+                  >
+                    {{ row.statistic?.allWorkingHours || 0 }}h
+                  </el-button>
+                </template>
+              </vxe-column>
+              <vxe-column field="statistic.userCount" title="处理人数" width="100" align="center">
+                <template #default="{ row }">
+                  <el-button 
+                    type="primary" 
+                    link 
+                    @click="showUserDetailDialog(row)"
+                    :disabled="!row.statistic?.userCount"
+                  >
+                    {{ row.statistic?.userCount || 0 }}
+                  </el-button>
+                </template>
+              </vxe-column>
               <vxe-column title="操作" width="150" fixed="right" align="center">
                 <template #default="{ row }">
                   <el-button type="primary" link @click="handleEditModule(row)">
@@ -242,6 +278,89 @@
     :module-tree-data="modulesData"
     @success="handleTaskSuccess"
   />
+
+  <!-- 任务详情弹窗 -->
+  <el-dialog
+    v-model="taskDetailDialogVisible"
+    :title="currentDetailTitle"
+    width="800px"
+    :close-on-click-modal="false"
+  >
+    <vxe-table
+      :data="currentDetailData"
+      border
+      row-key
+      :tree-config="{ children: 'children', expandAll: true }"
+      height="400"
+    >
+      <vxe-column type="seq" title="序号" width="60" align="center" tree-node />
+      <vxe-column field="title" title="任务标题" min-width="200" tree-node />
+      <vxe-column field="assignee" title="处理人" width="120" />
+      <vxe-column field="status" title="状态" width="100" align="center">
+        <template #default="{ row }">
+          <el-tag :type="getTaskStatusType(row.status)" size="small">
+            {{ row.statusName }}
+          </el-tag>
+        </template>
+      </vxe-column>
+      <vxe-column field="priority" title="优先级" width="100" align="center">
+        <template #default="{ row }">
+          <el-tag :type="getPriorityType(row.priority)" size="small">
+            {{ row.priorityName }}
+          </el-tag>
+        </template>
+      </vxe-column>
+      <vxe-column field="progress" title="进度" width="100" align="center">
+        <template #default="{ row }">
+          <span>{{ row.progress }}%</span>
+        </template>
+      </vxe-column>
+    </vxe-table>
+  </el-dialog>
+
+  <!-- 工作时长详情弹窗 -->
+  <el-dialog
+    v-model="workingHoursDialogVisible"
+    :title="currentDetailTitle"
+    width="700px"
+    :close-on-click-modal="false"
+  >
+    <vxe-table
+      :data="currentDetailData"
+      border
+      row-key
+      :tree-config="{ children: 'children', expandAll: true }"
+      height="400"
+    >
+      <vxe-column type="seq" title="序号" width="60" align="center" tree-node />
+      <vxe-column field="userName" title="人员" width="120" />
+      <vxe-column field="taskName" title="任务" min-width="200" />
+      <vxe-column field="hours" title="工作时长(小时)" width="120" align="center" />
+      <vxe-column field="date" title="日期" width="120" />
+    </vxe-table>
+  </el-dialog>
+
+  <!-- 处理人详情弹窗 -->
+  <el-dialog
+    v-model="userDetailDialogVisible"
+    :title="currentDetailTitle"
+    width="600px"
+    :close-on-click-modal="false"
+  >
+    <vxe-table
+      :data="currentDetailData"
+      border
+      row-key
+      :tree-config="{ children: 'children', expandAll: true }"
+      height="400"
+    >
+      <vxe-column type="seq" title="序号" width="60" align="center" tree-node />
+      <vxe-column field="userName" title="姓名" width="120" />
+      <vxe-column field="role" title="角色" width="120" />
+      <vxe-column field="taskCount" title="任务数" width="100" align="center" />
+      <vxe-column field="totalHours" title="总工时(小时)" width="120" align="center" />
+    </vxe-table>
+  </el-dialog>
 </template>
 
 <script setup>
@@ -301,6 +420,55 @@ const modulesData = ref([
     planCompleteTime: '2024-04-20',
     sort: 1,
     projectId: projectId.value,
+    statistic: {
+      allCount: 8,
+      allTask: [
+        {
+          id: 101,
+          title: 'HVAC控制器开发',
+          assignee: '张工程师',
+          status: 2,
+          statusName: '进行中',
+          priority: 1,
+          priorityName: '高',
+          progress: 75,
+          children: [
+            {
+              id: 1011,
+              title: '温度传感器集成',
+              assignee: '李开发',
+              status: 3,
+              statusName: '已完成',
+              priority: 2,
+              priorityName: '中',
+              progress: 100
+            }
+          ]
+        },
+        {
+          id: 102,
+          title: '照明系统开发',
+          assignee: '赵工程师',
+          status: 1,
+          statusName: '待开始',
+          priority: 2,
+          priorityName: '中',
+          progress: 0
+        }
+      ],
+      userCount: 5,
+      allUser: [
+        { userName: '张工程师', role: '主要负责人', taskCount: 3, totalHours: 45 },
+        { userName: '李开发', role: '开发工程师', taskCount: 2, totalHours: 25 },
+        { userName: '赵工程师', role: '开发工程师', taskCount: 2, totalHours: 30 }
+      ],
+      allWorkingHours: 120,
+      allWorkingHoursDetails: [
+        { userName: '张工程师', taskName: 'HVAC控制器开发', hours: 45, date: '2024-01-15' },
+        { userName: '李开发', taskName: '温度传感器集成', hours: 25, date: '2024-01-10' },
+        { userName: '赵工程师', taskName: '照明系统开发', hours: 30, date: '2024-01-20' }
+      ]
+    },
     children: [
       {
         id: 11,
@@ -312,6 +480,29 @@ const modulesData = ref([
         sort: 1,
         parentId: 1,
         projectId: projectId.value,
+        statistic: {
+          allCount: 5,
+          allTask: [
+            {
+              id: 111,
+              title: '温度传感器集成',
+              assignee: '李开发',
+              status: 3,
+              statusName: '已完成',
+              priority: 2,
+              priorityName: '中',
+              progress: 100
+            }
+          ],
+          userCount: 3,
+          allUser: [
+            { userName: '李开发', role: '开发工程师', taskCount: 2, totalHours: 25 }
+          ],
+          allWorkingHours: 45,
+          allWorkingHoursDetails: [
+            { userName: '李开发', taskName: '温度传感器集成', hours: 25, date: '2024-01-10' }
+          ]
+        },
         children: []
       },
       {
@@ -324,6 +515,29 @@ const modulesData = ref([
         sort: 2,
         parentId: 1,
         projectId: projectId.value,
+        statistic: {
+          allCount: 3,
+          allTask: [
+            {
+              id: 121,
+              title: '照明控制器开发',
+              assignee: '赵工程师',
+              status: 1,
+              statusName: '待开始',
+              priority: 2,
+              priorityName: '中',
+              progress: 0
+            }
+          ],
+          userCount: 2,
+          allUser: [
+            { userName: '赵工程师', role: '开发工程师', taskCount: 2, totalHours: 30 }
+          ],
+          allWorkingHours: 30,
+          allWorkingHoursDetails: [
+            { userName: '赵工程师', taskName: '照明控制器开发', hours: 30, date: '2024-01-20' }
+          ]
+        },
         children: []
       }
     ]
@@ -337,6 +551,29 @@ const modulesData = ref([
     planCompleteTime: '2024-05-01',
     sort: 2,
     projectId: projectId.value,
+    statistic: {
+      allCount: 6,
+      allTask: [
+        {
+          id: 201,
+          title: '监控摄像头安装',
+          assignee: '孙工程师',
+          status: 2,
+          statusName: '进行中',
+          priority: 1,
+          priorityName: '高',
+          progress: 40
+        }
+      ],
+      userCount: 4,
+      allUser: [
+        { userName: '孙工程师', role: '主要负责人', taskCount: 3, totalHours: 50 }
+      ],
+      allWorkingHours: 85,
+      allWorkingHoursDetails: [
+        { userName: '孙工程师', taskName: '监控摄像头安装', hours: 50, date: '2024-02-01' }
+      ]
+    },
     children: []
   },
   {
@@ -348,6 +585,14 @@ const modulesData = ref([
     planCompleteTime: '2024-02-15',
     sort: 3,
     projectId: projectId.value,
+    statistic: {
+      allCount: 0,
+      allTask: [],
+      userCount: 0,
+      allUser: [],
+      allWorkingHours: 0,
+      allWorkingHoursDetails: []
+    },
     children: []
   }
 ])
@@ -738,6 +983,40 @@ const handleTaskSuccess = (taskData) => {
   }
   
   ElMessage.success(taskEditMode.value === 'add' ? '创建成功' : '更新成功')
+}
+
+// 弹窗相关状态
+const taskDetailDialogVisible = ref(false)
+const workingHoursDialogVisible = ref(false)
+const userDetailDialogVisible = ref(false)
+const currentDetailData = ref(null)
+const currentDetailTitle = ref('')
+
+// 任务详情弹窗
+const showTaskDetailDialog = (row) => {
+  if (!row.statistic?.allTask || row.statistic.allTask.length === 0) return
+  
+  currentDetailData.value = row.statistic.allTask
+  currentDetailTitle.value = `${row.moduleName} - 任务详情`
+  taskDetailDialogVisible.value = true
+}
+
+// 工作时长详情弹窗
+const showWorkingHoursDialog = (row) => {
+  if (!row.statistic?.allWorkingHoursDetails || row.statistic.allWorkingHoursDetails.length === 0) return
+  
+  currentDetailData.value = row.statistic.allWorkingHoursDetails
+  currentDetailTitle.value = `${row.moduleName} - 工作记录详情`
+  workingHoursDialogVisible.value = true
+}
+
+// 处理人详情弹窗
+const showUserDetailDialog = (row) => {
+  if (!row.statistic?.allUser || row.statistic.allUser.length === 0) return
+  
+  currentDetailData.value = row.statistic.allUser
+  currentDetailTitle.value = `${row.moduleName} - 处理人详情`
+  userDetailDialogVisible.value = true
 }
 
 // 缺陷操作
