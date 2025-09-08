@@ -137,6 +137,12 @@ const routes = [
             name: 'ReportInstance',
             component: () => import('@/views/report/instance/index.vue'),
             meta: { title: '实例管理', icon: 'Monitor', hidden: true }
+          },
+          {
+            path: '/report/review',
+            name: 'ReportReview',
+            component: () => import('@/views/report/review/index.vue'),
+            meta: { title: '报告审核', icon: 'Check' }
           }
         ]
       },
