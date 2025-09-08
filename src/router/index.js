@@ -35,6 +35,12 @@ const routes = [
             name: 'Menu',
             meta: { title: '菜单管理', icon: 'Menu' },
             component: () => import('@/views/system/Menu.vue')
+          },
+          {
+            path: '/system/product',
+            name: 'Product',
+            meta: { title: '产品线管理', icon: 'Goods' },
+            component: () => import('@/views/system/product/list.vue')
           }
         ]
       },

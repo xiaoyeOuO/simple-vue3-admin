@@ -36,13 +36,23 @@
         <el-tab-pane label="模块列表" name="modules">
           <div class="tab-content">
             <div class="tab-header">
-              <el-button type="primary" @click="handleAddModule">
-                <el-icon><Plus /></el-icon>
-                新增模块
-              </el-button>
+              <div class="header-left">
+                <el-button type="primary" @click="handleAddModule">
+                  <el-icon><Plus /></el-icon>
+                  新增模块
+                </el-button>
+              </div>
+              <div class="header-right">
+                <el-radio-group v-model="moduleViewType" size="small">
+                  <el-radio-button label="tree">树形视图</el-radio-button>
+                  <el-radio-button label="gantt">甘特图</el-radio-button>
+                </el-radio-group>
+              </div>
             </div>
             
+            <!-- 树形视图 -->
             <vxe-table
+              v-if="moduleViewType === 'tree'"
               ref="xTable"
               :data="modulesData"
               border
@@ -93,6 +103,11 @@
                 </template>
               </vxe-column>
             </vxe-table>
+
+            <!-- 甘特图视图 -->
+            <div v-else-if="moduleViewType === 'gantt'" class="gantt-container">
+              <div ref="ganttChart" class="gantt-chart"></div>
+            </div>
           </div>
         </el-tab-pane>
 
@@ -245,7 +260,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, computed, nextTick, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { Plus, Edit, Delete, Folder, Document } from '@element-plus/icons-vue'
@@ -290,6 +305,11 @@ const taskEditVisible = ref(false)
 const taskEditMode = ref('add')
 const currentTask = ref(null)
 
+// 模块视图控制
+const moduleViewType = ref('tree')
+const ganttChart = ref(null)
+let ganttInstance = null
+
 // 模块数据（树形结构）
 const modulesData = ref([
   {
@@ -299,6 +319,9 @@ const modulesData = ref([
     state: 1,
     briefIntroduction: '楼宇自动化控制系统，包含HVAC、照明、电梯等子系统',
     planCompleteTime: '2024-04-20',
+    startTime: '2024-01-15',
+    endTime: '2024-04-20',
+    progress: 65,
     sort: 1,
     projectId: projectId.value,
     children: [
@@ -309,6 +332,9 @@ const modulesData = ref([
         state: 1,
         briefIntroduction: '空调通风控制系统',
         planCompleteTime: '2024-03-15',
+        startTime: '2024-01-20',
+        endTime: '2024-03-15',
+        progress: 80,
         sort: 1,
         parentId: 1,
         projectId: projectId.value,
@@ -321,7 +347,25 @@ const modulesData = ref([
         state: 2,
         briefIntroduction: '智能照明控制系统',
         planCompleteTime: '2024-03-30',
+        startTime: '2024-02-01',
+        endTime: '2024-03-30',
+        progress: 100,
         sort: 2,
+        parentId: 1,
+        projectId: projectId.value,
+        children: []
+      },
+      {
+        id: 13,
+        moduleName: '电梯控制模块',
+        softId: 'MOD-001-03',
+        state: 0,
+        briefIntroduction: '电梯智能调度系统',
+        planCompleteTime: '2024-04-10',
+        startTime: '2024-02-15',
+        endTime: '2024-04-10',
+        progress: 0,
+        sort: 3,
         parentId: 1,
         projectId: projectId.value,
         children: []
@@ -332,12 +376,61 @@ const modulesData = ref([
     id: 2,
     moduleName: '安防监控系统',
     softId: 'MOD-002',
-    state: 0,
+    state: 1,
     briefIntroduction: '视频监控、门禁控制、报警系统',
     planCompleteTime: '2024-05-01',
+    startTime: '2024-02-01',
+    endTime: '2024-05-01',
+    progress: 45,
     sort: 2,
     projectId: projectId.value,
-    children: []
+    children: [
+      {
+        id: 21,
+        moduleName: '视频监控模块',
+        softId: 'MOD-002-01',
+        state: 1,
+        briefIntroduction: '高清视频监控系统',
+        planCompleteTime: '2024-04-15',
+        startTime: '2024-02-05',
+        endTime: '2024-04-15',
+        progress: 60,
+        sort: 1,
+        parentId: 2,
+        projectId: projectId.value,
+        children: []
+      },
+      {
+        id: 22,
+        moduleName: '门禁控制模块',
+        softId: 'MOD-002-02',
+        state: 2,
+        briefIntroduction: '智能门禁管理系统',
+        planCompleteTime: '2024-03-25',
+        startTime: '2024-02-10',
+        endTime: '2024-03-25',
+        progress: 100,
+        sort: 2,
+        parentId: 2,
+        projectId: projectId.value,
+        children: []
+      },
+      {
+        id: 23,
+        moduleName: '报警系统模块',
+        softId: 'MOD-002-03',
+        state: 0,
+        briefIntroduction: '智能报警联动系统',
+        planCompleteTime: '2024-04-30',
+        startTime: '2024-03-01',
+        endTime: '2024-04-30',
+        progress: 20,
+        sort: 3,
+        parentId: 2,
+        projectId: projectId.value,
+        children: []
+      }
+    ]
   },
   {
     id: 3,
@@ -346,9 +439,71 @@ const modulesData = ref([
     state: 2,
     briefIntroduction: '能耗监测、分析、优化管理系统',
     planCompleteTime: '2024-02-15',
+    startTime: '2024-01-10',
+    endTime: '2024-02-15',
+    progress: 100,
     sort: 3,
     projectId: projectId.value,
     children: []
+  },
+  {
+    id: 4,
+    moduleName: '网络基础设施',
+    softId: 'MOD-004',
+    state: 1,
+    briefIntroduction: '网络布线、交换机、路由器等基础设施',
+    planCompleteTime: '2024-03-20',
+    startTime: '2024-01-25',
+    endTime: '2024-03-20',
+    progress: 75,
+    sort: 4,
+    projectId: projectId.value,
+    children: []
+  },
+  {
+    id: 5,
+    moduleName: '数据中心建设',
+    softId: 'MOD-005',
+    state: 0,
+    briefIntroduction: '服务器机房、存储系统、备份系统',
+    planCompleteTime: '2024-06-30',
+    startTime: '2024-03-01',
+    endTime: '2024-06-30',
+    progress: 10,
+    sort: 5,
+    projectId: projectId.value,
+    children: [
+      {
+        id: 51,
+        moduleName: '服务器部署',
+        softId: 'MOD-005-01',
+        state: 0,
+        briefIntroduction: '服务器硬件安装配置',
+        planCompleteTime: '2024-05-15',
+        startTime: '2024-03-10',
+        endTime: '2024-05-15',
+        progress: 15,
+        sort: 1,
+        parentId: 5,
+        projectId: projectId.value,
+        children: []
+      },
+      {
+        id: 52,
+        moduleName: '存储系统',
+        softId: 'MOD-005-02',
+        state: 0,
+        briefIntroduction: '存储阵列配置部署',
+        planCompleteTime: '2024-06-15',
+        startTime: '2024-04-01',
+        endTime: '2024-06-15',
+        progress: 5,
+        sort: 2,
+        parentId: 5,
+        projectId: projectId.value,
+        children: []
+      }
+    ]
   }
 ])
 
@@ -552,6 +707,238 @@ const formatDate = (date) => {
   if (!date) return '-'
   return new Date(date).toLocaleDateString('zh-CN')
 }
+
+// 甘特图相关方法
+const initGanttChart = () => {
+  if (!ganttChart.value) return
+
+  // 扁平化模块数据用于甘特图
+  const ganttData = []
+  const flattenModules = (items, level = 0) => {
+    items.forEach(item => {
+      ganttData.push({
+        id: item.id.toString(),
+        label: item.moduleName,
+        start: new Date(item.startTime).getTime(),
+        end: new Date(item.endTime).getTime(),
+        progress: item.progress / 100,
+        type: 'task',
+        level: level,
+        description: item.briefIntroduction,
+        state: item.state,
+        children: item.children || []
+      })
+      if (item.children && item.children.length) {
+        flattenModules(item.children, level + 1)
+      }
+    })
+  }
+  
+  flattenModules(modulesData.value)
+
+  // 创建甘特图配置
+  const config = {
+    headerHeight: 50,
+    rowHeight: 40,
+    barHeight: 30,
+    handleWidth: 8,
+    timeStart: new Date('2024-01-01').getTime(),
+    timeEnd: new Date('2024-07-01').getTime(),
+    timeUnit: 'day',
+    timeFormat: 'YYYY-MM-DD',
+    tasks: ganttData,
+    onTaskClick: (task) => {
+      console.log('Task clicked:', task)
+    }
+  }
+
+  // 创建甘特图实例
+  if (ganttInstance) {
+    ganttInstance.destroy()
+  }
+  
+  // 使用简单的甘特图实现
+  renderSimpleGantt(ganttData)
+}
+
+const renderSimpleGantt = (tasks) => {
+  const container = ganttChart.value
+  if (!container) return
+
+  // 清空容器
+  container.innerHTML = ''
+
+  // 创建甘特图容器
+  const ganttContainer = document.createElement('div')
+  ganttContainer.className = 'simple-gantt'
+  ganttContainer.style.cssText = `
+    width: 100%;
+    height: 500px;
+    border: 1px solid #e4e7ed;
+    border-radius: 4px;
+    overflow: auto;
+  `
+
+  // 创建表头
+  const header = document.createElement('div')
+  header.className = 'gantt-header'
+  header.style.cssText = `
+    display: flex;
+    border-bottom: 1px solid #e4e7ed;
+    background: #f5f7fa;
+    font-weight: bold;
+  `
+
+  // 任务列表列
+  const taskListHeader = document.createElement('div')
+  taskListHeader.style.cssText = `
+    width: 300px;
+    padding: 12px;
+    border-right: 1px solid #e4e7ed;
+  `
+  taskListHeader.textContent = '模块名称'
+  header.appendChild(taskListHeader)
+
+  // 时间轴
+  const timelineHeader = document.createElement('div')
+  timelineHeader.style.cssText = `
+    flex: 1;
+    display: flex;
+    overflow-x: auto;
+  `
+
+  // 生成时间轴
+  const startDate = new Date('2024-01-01')
+  const endDate = new Date('2024-07-01')
+  const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24))
+  
+  for (let i = 0; i < days; i += 7) {
+    const date = new Date(startDate.getTime() + i * 24 * 60 * 60 * 1000)
+    const dayHeader = document.createElement('div')
+    dayHeader.style.cssText = `
+      min-width: 100px;
+      padding: 12px;
+      border-right: 1px solid #e4e7ed;
+      text-align: center;
+      font-size: 12px;
+    `
+    dayHeader.textContent = date.toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' })
+    timelineHeader.appendChild(dayHeader)
+  }
+
+  header.appendChild(timelineHeader)
+  ganttContainer.appendChild(header)
+
+  // 创建任务行
+  tasks.forEach(task => {
+    const row = document.createElement('div')
+    row.style.cssText = `
+      display: flex;
+      border-bottom: 1px solid #e4e7ed;
+      height: 40px;
+      align-items: center;
+    `
+
+    // 任务名称
+    const taskName = document.createElement('div')
+    taskName.style.cssText = `
+      width: 300px;
+      padding: 8px 12px;
+      border-right: 1px solid #e4e7ed;
+      font-size: 14px;
+      padding-left: ${12 + task.level * 20}px;
+    `
+    taskName.textContent = task.label
+    row.appendChild(taskName)
+
+    // 任务条
+    const timeline = document.createElement('div')
+    timeline.style.cssText = `
+      flex: 1;
+      position: relative;
+      height: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        #f9fafb,
+        #f9fafb 99px,
+        #e4e7ed 99px,
+        #e4e7ed 100px
+      );
+    `
+
+    const startDate = new Date('2024-01-01')
+    const taskStart = new Date(task.start)
+    const taskEnd = new Date(task.end)
+    
+    const startOffset = Math.ceil((taskStart - startDate) / (1000 * 60 * 60 * 24))
+    const duration = Math.ceil((taskEnd - taskStart) / (1000 * 60 * 60 * 24))
+    
+    const taskBar = document.createElement('div')
+    taskBar.style.cssText = `
+      position: absolute;
+      left: ${startOffset * 14.28}px;
+      width: ${duration * 14.28}px;
+      top: 8px;
+      height: 24px;
+      background: ${getTaskColor(task.progress, task.state)};
+      border-radius: 12px;
+      border: 1px solid ${getTaskBorderColor(task.state)};
+      color: white;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    `
+    taskBar.textContent = `${Math.round(task.progress * 100)}%`
+    taskBar.title = `${task.label}: ${taskStart.toLocaleDateString()} - ${taskEnd.toLocaleDateString()}`
+    
+    taskBar.addEventListener('mouseenter', () => {
+      taskBar.style.opacity = '0.8'
+    })
+    taskBar.addEventListener('mouseleave', () => {
+      taskBar.style.opacity = '1'
+    })
+    
+    timeline.appendChild(taskBar)
+    row.appendChild(timeline)
+    ganttContainer.appendChild(row)
+  })
+
+  container.appendChild(ganttContainer)
+}
+
+const getTaskColor = (progress, state) => {
+  const colors = {
+    0: '#909399', // 待开始
+    1: '#409EFF', // 进行中
+    2: '#67C23A', // 已完成
+    3: '#E6A23C', // 已暂停
+    4: '#F56C6C'  // 已取消
+  }
+  return colors[state] || '#409EFF'
+}
+
+const getTaskBorderColor = (state) => {
+  const colors = {
+    0: '#606266',
+    1: '#1890ff',
+    2: '#52c41a',
+    3: '#faad14',
+    4: '#ff4d4f'
+  }
+  return colors[state] || '#1890ff'
+}
+
+// 监听视图切换
+watch(moduleViewType, (newType) => {
+  if (newType === 'gantt') {
+    nextTick(() => {
+      initGanttChart()
+    })
+  }
+})
 
 const getLevel = (row) => {
   let level = 0
@@ -812,5 +1199,39 @@ onMounted(() => {
 :deep(.el-tabs__nav-wrap::after) {
   height: 1px;
   background-color: #ebeef5;
+}
+</style>
+
+<style scoped>
+.simple-gantt {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.gantt-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.simple-gantt > div:last-child {
+  border-bottom: none;
+}
+
+.simple-gantt::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.simple-gantt::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+.simple-gantt::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.simple-gantt::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }
 </style>
