@@ -10,6 +10,8 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.1.0",
+    "@wangeditor/editor": "^5.1.23",
+    "@wangeditor/editor-for-vue": "^5.1.12",
     "echarts": "^6.0.0",
     "element-plus": "^2.4.4",
     "gantt-schedule-timeline-calendar": "^3.41.1",
