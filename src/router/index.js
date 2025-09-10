@@ -47,12 +47,6 @@ const routes = [
             name: 'Worktime',
             meta: { title: '工时管理', icon: 'Clock' },
             component: () => import('@/views/system/worktime/index.vue')
-          },
-          {
-            path: '/system/product',
-            name: 'Product',
-            meta: { title: '产品线管理', icon: 'Goods' },
-            component: () => import('@/views/system/product/list.vue')
           }
         ]
       },
@@ -143,12 +137,6 @@ const routes = [
             name: 'ReportInstance',
             component: () => import('@/views/report/instance/index.vue'),
             meta: { title: '实例管理', icon: 'Monitor', hidden: true }
-          },
-          {
-            path: '/report/review',
-            name: 'ReportReview',
-            component: () => import('@/views/report/review/index.vue'),
-            meta: { title: '报告审核', icon: 'Check' }
           }
         ]
       },
@@ -197,6 +185,12 @@ const routes = [
         meta: { title: '项目列表管理', icon: 'List' }
       }
         ]
+      },
+      {
+        path: '/bigData',
+        name: 'BigData',
+        meta: { title: '大数据展示', icon: 'DataLine' },
+        component: () => import('@/views/bigData/index.vue')
       }
     ]
   },

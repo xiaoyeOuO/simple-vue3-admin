@@ -15,9 +15,13 @@
     "echarts": "^6.0.0",
     "element-plus": "^2.4.4",
     "gantt-schedule-timeline-calendar": "^3.41.1",
+    "lottie-web": "^5.13.0",
+    "moment": "^2.30.1",
+    "momentjs": "^2.0.0",
     "pinia": "^2.3.1",
     "vue": "^3.3.8",
     "vue-gantt-schedule-timeline-calendar": "^3.0.44",
+    "vue-ganttastic": "^0.9.34",
     "vue-router": "^4.2.5",
     "vxe-table": "^4.16.0",
     "xe-utils": "^3.7.8"
