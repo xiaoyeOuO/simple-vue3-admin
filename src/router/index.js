@@ -47,6 +47,12 @@ const routes = [
             name: 'Worktime',
             meta: { title: '工时管理', icon: 'Clock' },
             component: () => import('@/views/system/worktime/index.vue')
+          },
+          {
+            path: '/system/personnelProfile',
+            name: 'PersonnelProfile',
+            meta: { title: '人员档案', icon: 'Avatar' },
+            component: () => import('@/views/system/personnelProfile/index.vue')
           }
         ]
       },
@@ -183,6 +189,12 @@ const routes = [
         name: 'ProjectList',
         component: () => import('@/views/coding/projectList/index.vue'),
         meta: { title: '项目列表管理', icon: 'List' }
+      },
+      {
+        path: '/coding/softProjectBind',
+        name: 'SoftProjectBind',
+        component: () => import('@/views/coding/softProjectBind/index.vue'),
+        meta: { title: '软件项目绑定', icon: 'Connection' }
       }
         ]
       },
