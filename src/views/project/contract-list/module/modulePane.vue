@@ -308,7 +308,7 @@
       :close-on-click-modal="false"
     >
       <vxe-table
-        :data="currentDetailData"
+        :data="pagedTaskData"
         border
         row-key
         :tree-config="{ children: 'children', expandAll: true }"
@@ -337,6 +337,17 @@
           </template>
         </vxe-column>
       </vxe-table>
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="taskCurrentPage"
+          v-model:page-size="taskPageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="taskTotalCount"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleTaskSizeChange"
+          @current-change="handleTaskCurrentChange"
+        />
+      </div>
     </el-dialog>
 
     <!-- 工作时长详情弹窗 -->
@@ -347,7 +358,7 @@
       :close-on-click-modal="false"
     >
       <vxe-table
-        :data="currentDetailData"
+        :data="pagedWorkingHoursData"
         border
         row-key
         :tree-config="{ children: 'children', expandAll: true }"
@@ -359,6 +370,17 @@
         <vxe-column field="hours" title="工作时长(小时)" width="120" align="center" />
         <vxe-column field="date" title="日期" width="120" />
       </vxe-table>
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="workingHoursCurrentPage"
+          v-model:page-size="workingHoursPageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="workingHoursTotalCount"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleWorkingHoursSizeChange"
+          @current-change="handleWorkingHoursCurrentChange"
+        />
+      </div>
     </el-dialog>
 
     <!-- 处理人详情弹窗 -->
@@ -369,7 +391,7 @@
       :close-on-click-modal="false"
     >
       <vxe-table
-        :data="currentDetailData"
+        :data="pagedUserData"
         border
         row-key
         :tree-config="{ children: 'children', expandAll: true }"
@@ -381,6 +403,17 @@
         <vxe-column field="taskCount" title="任务数" width="100" align="center" />
         <vxe-column field="totalHours" title="总工时(小时)" width="120" align="center" />
       </vxe-table>
+      <div class="pagination-container">
+        <el-pagination
+          v-model:current-page="userCurrentPage"
+          v-model:page-size="userPageSize"
+          :page-sizes="[10, 20, 50, 100]"
+          :total="userTotalCount"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleUserSizeChange"
+          @current-change="handleUserCurrentChange"
+        />
+      </div>
     </el-dialog>
   </div>
 </template>
@@ -437,11 +470,49 @@ const userDetailDialogVisible = ref(false)
 const currentDetailTitle = ref('')
 const currentDetailData = ref([])
 
+// 分页相关状态
+// 任务详情分页
+const taskCurrentPage = ref(1)
+const taskPageSize = ref(10)
+const taskTotalCount = ref(0)
+
+// 工作时长详情分页
+const workingHoursCurrentPage = ref(1)
+const workingHoursPageSize = ref(10)
+const workingHoursTotalCount = ref(0)
+
+// 处理人详情分页
+const userCurrentPage = ref(1)
+const userPageSize = ref(10)
+const userTotalCount = ref(0)
+
 // 计算属性：甘特图容器宽度
 const ganttContainerWidth = computed(() => {
   if (timelineData.value.length === 0) return '800px'
   const totalWidth = timelineData.value.length * ganttConfig.value.dayWidth
   return `${Math.max(totalWidth, 800)}px`
+})
+
+// 计算属性：分页数据
+// 任务详情分页数据
+const pagedTaskData = computed(() => {
+  const start = (taskCurrentPage.value - 1) * taskPageSize.value
+  const end = start + taskPageSize.value
+  return currentDetailData.value.slice(start, end)
+})
+
+// 工作时长详情分页数据
+const pagedWorkingHoursData = computed(() => {
+  const start = (workingHoursCurrentPage.value - 1) * workingHoursPageSize.value
+  const end = start + workingHoursPageSize.value
+  return currentDetailData.value.slice(start, end)
+})
+
+// 处理人详情分页数据
+const pagedUserData = computed(() => {
+  const start = (userCurrentPage.value - 1) * userPageSize.value
+  const end = start + userPageSize.value
+  return currentDetailData.value.slice(start, end)
 })
 
 // 计算属性：展平模块数据（为甘特图使用）
@@ -700,6 +771,8 @@ const showTaskDetail = (row) => {
   if (row.statistic?.allTask) {
     currentDetailData.value = row.statistic.allTask
     currentDetailTitle.value = `模块 ${row.moduleName} 的任务详情`
+    taskTotalCount.value = row.statistic.allTask.length
+    taskCurrentPage.value = 1
     taskDetailDialogVisible.value = true
   }
 }
@@ -708,6 +781,8 @@ const showWorkingHours = (row) => {
   if (row.statistic?.allWorkingHoursDetails) {
     currentDetailData.value = row.statistic.allWorkingHoursDetails
     currentDetailTitle.value = `模块 ${row.moduleName} 的工作时长详情`
+    workingHoursTotalCount.value = row.statistic.allWorkingHoursDetails.length
+    workingHoursCurrentPage.value = 1
     workingHoursDialogVisible.value = true
   }
 }
@@ -716,8 +791,41 @@ const showUserDetail = (row) => {
   if (row.statistic?.allUser) {
     currentDetailData.value = row.statistic.allUser
     currentDetailTitle.value = `模块 ${row.moduleName} 的处理人详情`
+    userTotalCount.value = row.statistic.allUser.length
+    userCurrentPage.value = 1
     userDetailDialogVisible.value = true
   }
+}
+
+// 分页事件处理方法
+// 任务详情分页
+const handleTaskSizeChange = (val) => {
+  taskPageSize.value = val
+  taskCurrentPage.value = 1
+}
+
+const handleTaskCurrentChange = (val) => {
+  taskCurrentPage.value = val
+}
+
+// 工作时长详情分页
+const handleWorkingHoursSizeChange = (val) => {
+  workingHoursPageSize.value = val
+  workingHoursCurrentPage.value = 1
+}
+
+const handleWorkingHoursCurrentChange = (val) => {
+  workingHoursCurrentPage.value = val
+}
+
+// 处理人详情分页
+const handleUserSizeChange = (val) => {
+  userPageSize.value = val
+  userCurrentPage.value = 1
+}
+
+const handleUserCurrentChange = (val) => {
+  userCurrentPage.value = val
 }
 
 // 状态相关方法
@@ -1025,5 +1133,10 @@ watch(() => props.modulesData, () => {
 
 .table-view {
   height: 500px;
+}
+.pagination-container {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

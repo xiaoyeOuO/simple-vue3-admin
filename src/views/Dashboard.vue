@@ -251,6 +251,34 @@
         </el-card>
       </div>
     </div>
+    
+    <!-- 四个设计所人员分布饼图 -->
+    <el-card class="dashboard-card" style="margin-top: 20px; width: 100%;">
+      <template #header>
+        <div class="card-header">
+          <span>四个设计所人员分布</span>
+          <el-tag type="info">当前统计</el-tag>
+        </div>
+      </template>
+      <div class="pie-charts-container">
+        <div class="pie-chart-item">
+          <div ref="pieChart1" class="pie-chart"></div>
+          <div class="pie-chart-title">第一研究所</div>
+        </div>
+        <div class="pie-chart-item">
+          <div ref="pieChart2" class="pie-chart"></div>
+          <div class="pie-chart-title">第二研究所</div>
+        </div>
+        <div class="pie-chart-item">
+          <div ref="pieChart3" class="pie-chart"></div>
+          <div class="pie-chart-title">第三研究所</div>
+        </div>
+        <div class="pie-chart-item">
+          <div ref="pieChart4" class="pie-chart"></div>
+          <div class="pie-chart-title">第四研究所</div>
+        </div>
+      </div>
+    </el-card>
   </div>
 </template>
 
@@ -274,11 +302,16 @@ const lateCountData = ref([])
 const yesterdayMorningLate = ref([])
 const yesterdayAfternoonLate = ref([])
 
-// 新增数据变量
+// 图表引用
 const taskHoursChart = ref()
+const pieChart1 = ref()
+const pieChart2 = ref()
+const pieChart3 = ref()
+const pieChart4 = ref()
 const insufficientTimeEmployees = ref([])
 const qaResolvedData = ref([])
 let chartInstance = null
+let pieChartInstances = []
 
 // 模拟API调用
 const mockApiCall = (data, delay = 500) => {
@@ -500,10 +533,122 @@ const initTaskHoursChart = async () => {
   }
 
   chartInstance.setOption(option)
+}
 
-  // 响应式处理
-  window.addEventListener('resize', () => {
-    chartInstance && chartInstance.resize()
+// 初始化四个设计所人员分布饼图
+const initPieCharts = async () => {
+  await nextTick()
+  
+  // 清理现有的饼图实例
+  pieChartInstances.forEach(instance => {
+    if (instance) instance.dispose()
+  })
+  pieChartInstances = []
+
+  // 模拟四个设计所的人员数据
+  const pieData = [
+    {
+      name: '第一研究所',
+      data: [
+        { value: 120, name: '在册人员' },
+        { value: 45, name: '劳务人员' },
+        { value: 30, name: '外包人员' },
+        { value: 15, name: '集中办公人员' }
+      ]
+    },
+    {
+      name: '第二研究所',
+      data: [
+        { value: 98, name: '在册人员' },
+        { value: 38, name: '劳务人员' },
+        { value: 25, name: '外包人员' },
+        { value: 12, name: '集中办公人员' }
+      ]
+    },
+    {
+      name: '第三研究所',
+      data: [
+        { value: 135, name: '在册人员' },
+        { value: 52, name: '劳务人员' },
+        { value: 35, name: '外包人员' },
+        { value: 18, name: '集中办公人员' }
+      ]
+    },
+    {
+      name: '第四研究所',
+      data: [
+        { value: 110, name: '在册人员' },
+        { value: 42, name: '劳务人员' },
+        { value: 28, name: '外包人员' },
+        { value: 14, name: '集中办公人员' }
+      ]
+    }
+  ]
+
+  const chartRefs = [pieChart1, pieChart2, pieChart3, pieChart4]
+  
+  chartRefs.forEach((chartRef, index) => {
+    if (!chartRef.value) return
+    
+    const instance = echarts.init(chartRef.value)
+    const currentData = pieData[index]
+    
+    const option = {
+      title: {
+        text: currentData.name,
+        left: 'center',
+        textStyle: {
+          fontSize: 14,
+          fontWeight: 'normal'
+        }
+      },
+      tooltip: {
+        trigger: 'item',
+        formatter: '{a} <br/>{b}: {c} ({d}%)'
+      },
+      legend: {
+        orient: 'horizontal',
+        bottom: 10,
+        left: 'center',
+        itemWidth: 12,
+        itemHeight: 12,
+        textStyle: {
+          fontSize: 11
+        }
+      },
+      series: [
+        {
+          name: currentData.name,
+          type: 'pie',
+          radius: ['35%', '60%'],
+          center: ['50%', '45%'],
+          avoidLabelOverlap: false,
+          itemStyle: {
+            borderColor: '#fff',
+            borderWidth: 1
+          },
+          label: {
+            show: false,
+            position: 'center'
+          },
+          emphasis: {
+            label: {
+              show: true,
+              fontSize: 12,
+              fontWeight: 'bold'
+            }
+          },
+          labelLine: {
+            show: false
+          },
+          data: currentData.data
+        }
+      ],
+      color: ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C']
+    }
+    
+    instance.setOption(option)
+    pieChartInstances.push(instance)
   })
 }
 
@@ -525,18 +670,41 @@ const fetchAllData = async () => {
   }
 }
 
+// 统一的resize事件处理器
+const handleResize = () => {
+  if (chartInstance) chartInstance.resize()
+  pieChartInstances.forEach(instance => {
+    if (instance) instance.resize()
+  })
+}
+
 // 清理资源
 const cleanupChart = () => {
+  // 清理任务工时趋势图表
   if (chartInstance) {
     chartInstance.dispose()
     chartInstance = null
   }
-  window.removeEventListener('resize', cleanupChart)
+  
+  // 清理四个饼图实例
+  pieChartInstances.forEach(instance => {
+    if (instance) {
+      instance.dispose()
+    }
+  })
+  pieChartInstances = []
+  
+  // 清理事件监听器
+  window.removeEventListener('resize', handleResize)
 }
 
 // 初始化
-onMounted(() => {
-  fetchAllData()
+onMounted(async () => {
+  await fetchAllData()
+  await initPieCharts()
+  
+  // 添加统一的resize事件监听器
+  window.addEventListener('resize', handleResize)
 })
 
 // 组件卸载时清理
@@ -739,5 +907,65 @@ onUnmounted(() => {
 
 .el-rate {
   display: inline-block;
+}
+
+.pie-charts-container {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  padding: 20px;
+  justify-content: space-between;
+  align-items: flex-start;
+  overflow-x: auto;
+}
+
+.pie-chart-item {
+  flex: 1;
+  min-width: 220px;
+  max-width: 280px;
+  height: 320px;
+  flex-shrink: 1;
+}
+
+.pie-chart {
+  width: 100%;
+  height: 100%;
+}
+
+@media (max-width: 1200px) {
+  .pie-chart-item {
+    min-width: 200px;
+    max-width: 240px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 992px) {
+  .pie-chart-item {
+    min-width: 180px;
+    max-width: 220px;
+    height: 280px;
+  }
+}
+
+@media (max-width: 768px) {
+  .pie-chart-item {
+    min-width: 160px;
+    max-width: 200px;
+    height: 260px;
+  }
+}
+
+@media (max-width: 576px) {
+  .pie-charts-container {
+    gap: 10px;
+    padding: 10px;
+  }
+  
+  .pie-chart-item {
+    min-width: 140px;
+    max-width: 180px;
+    height: 240px;
+  }
 }
 </style>

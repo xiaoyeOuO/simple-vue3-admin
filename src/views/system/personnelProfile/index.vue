@@ -50,10 +50,10 @@
           :xs="24" :sm="12" :md="8" :lg="6"
         >
           <el-card class="person-card" shadow="hover">
-            <div class="person-header">
-              <el-avatar :size="60" :src="person.avatar">{{ person.name.charAt(0) }}</el-avatar>
+            <div class="person-header" @click="goToPersonalHome(person.id)" style="cursor: pointer;">
+              <el-avatar :size="60" :src="person.avatar" class="clickable-avatar">{{ person.name.charAt(0) }}</el-avatar>
               <div class="person-info">
-                <h3>{{ person.name }}</h3>
+                <h3 class="clickable-name">{{ person.name }}</h3>
                 <p>{{ person.department }}</p>
               </div>
             </div>
@@ -94,8 +94,11 @@
 
 <script setup>
 import { ref, reactive, onMounted, nextTick, onUnmounted } from 'vue'
+import { useRouter } from 'vue-router'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
+
+const router = useRouter()
 
 // 搜索表单
 const searchForm = reactive({
@@ -344,6 +347,11 @@ const renderRadarChart = (chartEl, person) => {
   chartInstances.set(person.id, chart)
 }
 
+// 跳转到个人首页
+const goToPersonalHome = (userId) => {
+  router.push(`/personal/home/${userId}`)
+}
+
 // 搜索
 const handleSearch = () => {
   pagination.current = 1
@@ -434,6 +442,27 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   margin-bottom: 15px;
+  transition: all 0.3s ease;
+  padding: 10px;
+  border-radius: 8px;
+  margin: -10px -10px 15px -10px;
+}
+
+.person-header:hover {
+  background-color: #f5f7fa;
+}
+
+.clickable-avatar,
+.clickable-name {
+  transition: all 0.3s ease;
+}
+
+.person-header:hover .clickable-avatar {
+  transform: scale(1.1);
+}
+
+.person-header:hover .clickable-name {
+  color: #409EFF;
 }
 
 .person-info {

@@ -203,6 +203,20 @@ const routes = [
         name: 'BigData',
         meta: { title: '大数据展示', icon: 'DataLine' },
         component: () => import('@/views/bigData/index.vue')
+      },
+      {
+        path: '/personal',
+        name: 'Personal',
+        meta: { title: '个人中心', icon: 'User' },
+        redirect: '/personal/home',
+        children: [
+          {
+            path: '/personal/home/:id',
+            name: 'PersonalHome',
+            meta: { title: '个人首页', icon: 'House', hidden: true },
+            component: () => import('@/views/personal/home/index.vue')
+          }
+        ]
       }
     ]
   },
