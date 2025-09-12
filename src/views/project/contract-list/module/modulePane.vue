@@ -971,7 +971,7 @@ watch(() => props.modulesData, () => {
 }
 
 .gantt-header {
-  height: 60px;
+  height: 48px;
   border-bottom: 1px solid #e4e7ed;
   background-color: #f5f7fa;
 }
@@ -1017,7 +1017,7 @@ watch(() => props.modulesData, () => {
 }
 
 .gantt-row {
-  height: 54px;
+  height: 48px;
   border-bottom: 1px solid #f0f0f0;
   position: relative;
   cursor: pointer;
