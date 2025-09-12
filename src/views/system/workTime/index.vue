@@ -121,7 +121,7 @@
           <el-table-column 
             :prop="`${date.key}_morning`" 
             label="上午" 
-            width="60"
+            min-width="60"
             align="center"
           >
             <template #default="{ row }">
@@ -142,7 +142,7 @@
           <el-table-column 
             :prop="`${date.key}_afternoon`" 
             label="下午" 
-            width="60"
+            min-width="60"
             align="center"
           >
             <template #default="{ row }">
@@ -163,7 +163,7 @@
           <el-table-column 
             :prop="`${date.key}_evening`" 
             label="晚上" 
-            width="60"
+            min-width="60"
             align="center"
           >
             <template #default="{ row }">
