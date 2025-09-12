@@ -9,11 +9,13 @@
           :default-active="activeTopMenu"
           class="top-menu"
           @select="handleTopMenuSelect"
+          :ellipsis="false"
         >
           <el-menu-item 
             v-for="menu in topMenus" 
             :key="menu.path" 
             :index="menu.path"
+            class="top-menu-item"
           >
             <el-icon>
               <component :is="menu.meta.icon" />
@@ -48,7 +50,7 @@
           unique-opened
         >
           <template v-for="item in sideMenus" :key="item.path">
-            <el-sub-menu v-if="item.children" :index="item.path">
+            <el-sub-menu v-if="item.children && item.children.filter(child => !child.meta?.hidden).length > 0" :index="item.path">
               <template #title>
                 <el-icon>
                   <component :is="item.meta.icon" />
@@ -56,7 +58,7 @@
                 <span>{{ item.meta.title }}</span>
               </template>
               <el-menu-item 
-                v-for="child in item.children" 
+                v-for="child in item.children.filter(child => !child.meta?.hidden)" 
                 :key="child.path" 
                 :index="child.path"
               >
@@ -66,7 +68,7 @@
                 <span>{{ child.meta.title }}</span>
               </el-menu-item>
             </el-sub-menu>
-            <el-menu-item v-else :index="item.path">
+            <el-menu-item v-else-if="!item.meta?.hidden" :index="item.path">
               <el-icon>
                 <component :is="item.meta.icon" />
               </el-icon>
@@ -93,21 +95,31 @@ import TabBreadcrumb from '@/components/TabBreadcrumb.vue'
 const route = useRoute()
 const router = useRouter()
 
-// 获取顶级菜单
+// 获取顶级菜单（过滤隐藏的菜单）
 const topMenus = computed(() => {
   return router.getRoutes()
     .filter(route => route.path === '/')[0]
-    ?.children.filter(child => !child.path.includes('/:')) || []
+    ?.children.filter(child => 
+      !child.path.includes('/:') && 
+      !child.meta?.hidden
+    ) || []
 })
 
 // 当前激活的顶部菜单
 const activeTopMenu = ref('')
 
-// 根据顶部菜单获取对应的侧边菜单
+// 根据顶部菜单获取对应的侧边菜单（过滤隐藏的菜单）
 const sideMenus = computed(() => {
   const currentTop = activeTopMenu.value || '/dashboard'
   const matchedMenu = topMenus.value.find(menu => menu.path === currentTop)
-  return matchedMenu?.children || [matchedMenu].filter(Boolean) || []
+  
+  // 如果有子菜单，过滤隐藏的子菜单
+  if (matchedMenu?.children) {
+    return matchedMenu.children.filter(child => !child.meta?.hidden)
+  }
+  
+  // 如果没有子菜单，返回当前菜单本身（如果不隐藏）
+  return matchedMenu && !matchedMenu.meta?.hidden ? [matchedMenu] : []
 })
 
 
@@ -115,10 +127,15 @@ const sideMenus = computed(() => {
 // 处理顶部菜单选择
 const handleTopMenuSelect = (path) => {
   activeTopMenu.value = path
-  // 跳转到该菜单的第一个子页面
+  // 跳转到该菜单的第一个非隐藏子页面
   const menu = topMenus.value.find(m => m.path === path)
   if (menu?.children?.length > 0) {
-    router.push(menu.children[0].path)
+    const firstVisibleChild = menu.children.find(child => !child.meta?.hidden)
+    if (firstVisibleChild) {
+      router.push(firstVisibleChild.path)
+    } else {
+      router.push(path)
+    }
   } else {
     router.push(path)
   }
@@ -152,6 +169,8 @@ watch(() => route.path, (newPath) => {
 .header-left {
   display: flex;
   align-items: center;
+  flex: 1;
+  min-width: 0;
 }
 
 .logo {
@@ -159,15 +178,27 @@ watch(() => route.path, (newPath) => {
   font-weight: bold;
   color: #409eff;
   margin-right: 40px;
+  flex-shrink: 0;
 }
 
 .top-menu {
   border-bottom: none;
+  flex: 1;
+  overflow-x: auto;
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.top-menu-item {
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .header-right {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
+  margin-left: 20px;
 }
 
 .user-info {
@@ -175,6 +206,33 @@ watch(() => route.path, (newPath) => {
   align-items: center;
   gap: 8px;
   cursor: pointer;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .layout-header {
+    padding: 0 10px;
+  }
+  
+  .logo {
+    margin-right: 20px;
+    font-size: 18px;
+  }
+  
+  .header-right {
+    margin-left: 10px;
+  }
+}
+
+@media (max-width: 576px) {
+  .logo {
+    margin-right: 15px;
+    font-size: 16px;
+  }
+  
+  .top-menu {
+    font-size: 14px;
+  }
 }
 
 .layout-aside {

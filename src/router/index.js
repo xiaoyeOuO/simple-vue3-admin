@@ -92,7 +92,7 @@ const routes = [
           path: '/project/contract-list/detail/:id',
           name: 'ContractProjectDetail',
           component: () => import('@/views/project/contract-list/detail.vue'),
-          meta: { title: '合同项目详情', icon: 'detail', hidden: true }
+          meta: { title: '合同项目详情', icon: 'DocumentCopy', hidden: true }
         },
           {
             path: '/project/contract-type',
@@ -118,7 +118,7 @@ const routes = [
             path: '/report/index',
             name: 'ReportIndex',
             component: () => import('@/views/report/index.vue'),
-            meta: { title: '日报管理', icon: 'Document' }
+            meta: { title: '日报管理', icon: 'Document', hidden: true }
           },
           {
             path: '/report/todo',
@@ -169,7 +169,7 @@ const routes = [
       {
         path: '/coding',
         name: 'Coding',
-        meta: { title: '开发管理', icon: 'Code' },
+        meta: { title: '开发管理', icon: 'Monitor' },
         redirect: '/coding/projectConfig',
         children: [
           {
@@ -207,7 +207,7 @@ const routes = [
       {
         path: '/personal',
         name: 'Personal',
-        meta: { title: '个人中心', icon: 'User' },
+        meta: { title: '个人中心', icon: 'User', hidden: true },
         redirect: '/personal/home',
         children: [
           {
