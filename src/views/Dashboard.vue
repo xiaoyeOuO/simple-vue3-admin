@@ -262,20 +262,20 @@
       </template>
       <div class="pie-charts-container">
         <div class="pie-chart-item">
+          <div class="institute-name-vertical">第一研究所</div>
           <div ref="pieChart1" class="pie-chart"></div>
-          <div class="pie-chart-title">第一研究所</div>
         </div>
         <div class="pie-chart-item">
+          <div class="institute-name-vertical">第二研究所</div>
           <div ref="pieChart2" class="pie-chart"></div>
-          <div class="pie-chart-title">第二研究所</div>
         </div>
         <div class="pie-chart-item">
+          <div class="institute-name-vertical">第三研究所</div>
           <div ref="pieChart3" class="pie-chart"></div>
-          <div class="pie-chart-title">第三研究所</div>
         </div>
         <div class="pie-chart-item">
+          <div class="institute-name-vertical">第四研究所</div>
           <div ref="pieChart4" class="pie-chart"></div>
-          <div class="pie-chart-title">第四研究所</div>
         </div>
       </div>
     </el-card>
@@ -594,34 +594,27 @@ const initPieCharts = async () => {
     const currentData = pieData[index]
     
     const option = {
-      title: {
-        text: currentData.name,
-        left: 'center',
-        textStyle: {
-          fontSize: 14,
-          fontWeight: 'normal'
-        }
-      },
       tooltip: {
         trigger: 'item',
         formatter: '{a} <br/>{b}: {c} ({d}%)'
       },
       legend: {
-        orient: 'horizontal',
-        bottom: 10,
-        left: 'center',
-        itemWidth: 12,
-        itemHeight: 12,
-        textStyle: {
-          fontSize: 11
-        }
-      },
+          orient: 'vertical',
+          right: 0,
+          top: 'middle',
+          itemWidth: 10,
+          itemHeight: 10,
+          itemGap: 5,
+          textStyle: {
+            fontSize: 10
+          }
+        },
       series: [
         {
           name: currentData.name,
-          type: 'pie',
-          radius: ['35%', '60%'],
-          center: ['50%', '45%'],
+            type: 'pie',
+            radius: ['28%', '52%'],
+            center: ['33%', '50%'],
           avoidLabelOverlap: false,
           itemStyle: {
             borderColor: '#fff',
@@ -921,15 +914,35 @@ onUnmounted(() => {
 
 .pie-chart-item {
   flex: 1;
-  min-width: 220px;
-  max-width: 280px;
+  min-width: 240px;
+  max-width: 320px;
   height: 320px;
   flex-shrink: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .pie-chart {
   width: 100%;
   height: 100%;
+  flex: 1;
+}
+
+.institute-name-vertical {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  font-size: 14px;
+  font-weight: 500;
+  color: #606266;
+  white-space: nowrap;
+  padding: 4px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 2px;
 }
 
 @media (max-width: 1200px) {
