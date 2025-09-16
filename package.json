@@ -23,8 +23,8 @@
     "vue-gantt-schedule-timeline-calendar": "^3.0.44",
     "vue-ganttastic": "^0.9.34",
     "vue-router": "^4.2.5",
-    "vxe-table": "^4.16.0",
-    "xe-utils": "^3.7.8"
+    "vxe-table": "^4.16.11",
+    "xe-utils": "^3.7.9"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^4.5.0",

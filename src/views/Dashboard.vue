@@ -1,7 +1,7 @@
 <template>
   <div class="dashboard">
     <div class="dashboard-header">
-      <h1>仪表盘</h1>
+      <h1>项目仪表板</h1>
     </div>
 
     <!-- 原始统计卡片 -->
@@ -60,19 +60,7 @@
       </el-col>
     </el-row>
 
-    <!-- 四个表格的时间筛选 -->
-    <div class="tables-filter">
-      <div class="filter-content">
-        <el-date-picker v-model="dateRange" type="daterange" range-separator="至" start-placeholder="开始日期"
-          end-placeholder="结束日期" @change="fetchAllData" format="YYYY-MM-DD" value-format="YYYY-MM-DD" />
-        <el-button type="primary" @click="fetchAllData" :loading="loading">
-          <el-icon>
-            <Refresh />
-          </el-icon>
-          刷新数据
-        </el-button>
-      </div>
-    </div>
+
 
     <!-- 重新布局：左侧两行，右侧迟到人员 -->
     <div class="dashboard-layout">
@@ -85,7 +73,28 @@
               <template #header>
                 <div class="card-header">
                   <span>四个所代码当量</span>
-                  <el-tag type="info">{{ formatDateRange() }}</el-tag>
+                  <div class="table-date-filter">
+                    <el-date-picker
+                      v-model="tableDateRanges.codeEquivalent"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      size="small"
+                      style="width: 200px; margin-right: 8px;"
+                      @change="refreshTable('codeEquivalent')"
+                    />
+                    <el-button 
+                      type="primary" 
+                      size="small" 
+                      @click="refreshTable('codeEquivalent')"
+                      :loading="loading"
+                    >
+                      <el-icon><Refresh /></el-icon>
+                    </el-button>
+                  </div>
                 </div>
               </template>
               <el-table :data="codeEquivalentData" style="width: 100%" height="400">
@@ -104,7 +113,28 @@
               <template #header>
                 <div class="card-header">
                   <span>个人代码当量前五名</span>
-                  <el-tag type="info">{{ formatDateRange() }}</el-tag>
+                  <div class="table-date-filter">
+                    <el-date-picker
+                      v-model="tableDateRanges.top5Personal"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      size="small"
+                      style="width: 200px; margin-right: 8px;"
+                      @change="refreshTable('top5Personal')"
+                    />
+                    <el-button 
+                      type="primary" 
+                      size="small" 
+                      @click="refreshTable('top5Personal')"
+                      :loading="loading"
+                    >
+                      <el-icon><Refresh /></el-icon>
+                    </el-button>
+                  </div>
                 </div>
               </template>
               <el-table :data="top5PersonalData" style="width: 100%" height="400">
@@ -125,7 +155,28 @@
               <template #header>
                 <div class="card-header">
                   <span>迟到次数统计</span>
-                  <el-tag type="info">{{ formatDateRange() }}</el-tag>
+                  <div class="table-date-filter">
+                    <el-date-picker
+                      v-model="tableDateRanges.lateCount"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      size="small"
+                      style="width: 200px; margin-right: 8px;"
+                      @change="refreshTable('lateCount')"
+                    />
+                    <el-button 
+                      type="primary" 
+                      size="small" 
+                      @click="refreshTable('lateCount')"
+                      :loading="loading"
+                    >
+                      <el-icon><Refresh /></el-icon>
+                    </el-button>
+                  </div>
                 </div>
               </template>
               <el-table :data="lateCountData" style="width: 100%" height="400">
@@ -150,7 +201,28 @@
               <template #header>
                 <div class="card-header">
                   <span>任务工时趋势</span>
-                  <el-tag type="info">近7天</el-tag>
+                  <div class="table-date-filter">
+                    <el-date-picker
+                      v-model="tableDateRanges.taskHours"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      size="small"
+                      style="width: 200px; margin-right: 8px;"
+                      @change="refreshTable('taskHours')"
+                    />
+                    <el-button 
+                      type="primary" 
+                      size="small" 
+                      @click="refreshTable('taskHours')"
+                      :loading="loading"
+                    >
+                      <el-icon><Refresh /></el-icon>
+                    </el-button>
+                  </div>
                 </div>
               </template>
               <div ref="taskHoursChart" class="chart-container" style="height: 400px;"></div>
@@ -162,7 +234,28 @@
               <template #header>
                 <div class="card-header">
                   <span>时间不足员工列表</span>
-                  <el-tag type="warning">本月</el-tag>
+                  <div class="table-date-filter">
+                    <el-date-picker
+                      v-model="tableDateRanges.insufficientTime"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      size="small"
+                      style="width: 200px; margin-right: 8px;"
+                      @change="refreshTable('insufficientTime')"
+                    />
+                    <el-button 
+                      type="primary" 
+                      size="small" 
+                      @click="refreshTable('insufficientTime')"
+                      :loading="loading"
+                    >
+                      <el-icon><Refresh /></el-icon>
+                    </el-button>
+                  </div>
                 </div>
               </template>
               <el-table :data="insufficientTimeEmployees" style="width: 100%" height="400">
@@ -185,7 +278,28 @@
               <template #header>
                 <div class="card-header">
                   <span>有问必答解决数</span>
-                  <el-tag type="success">今日</el-tag>
+                  <div class="table-date-filter">
+                    <el-date-picker
+                      v-model="tableDateRanges.qaResolved"
+                      type="daterange"
+                      range-separator="至"
+                      start-placeholder="开始日期"
+                      end-placeholder="结束日期"
+                      format="YYYY-MM-DD"
+                      value-format="YYYY-MM-DD"
+                      size="small"
+                      style="width: 200px; margin-right: 8px;"
+                      @change="refreshTable('qaResolved')"
+                    />
+                    <el-button 
+                      type="primary" 
+                      size="small" 
+                      @click="refreshTable('qaResolved')"
+                      :loading="loading"
+                    >
+                      <el-icon><Refresh /></el-icon>
+                    </el-button>
+                  </div>
                 </div>
               </template>
               <el-table :data="qaResolvedData" style="width: 100%" height="400">
@@ -217,8 +331,27 @@
         <el-card class="dashboard-card">
           <template #header>
             <div class="card-header">
-              <span>昨日迟到人员</span>
-              <el-tag type="info">{{ getYesterdayDate() }}</el-tag>
+              <span>迟到人员</span>
+              <div class="table-date-filter">
+                <el-date-picker
+                  v-model="lateEmployeeDate"
+                  type="date"
+                  placeholder="选择日期"
+                  format="YYYY-MM-DD"
+                  value-format="YYYY-MM-DD"
+                  size="small"
+                  style="width: 140px; margin-right: 8px;"
+                  @change="refreshTable('lateEmployees')"
+                />
+                <el-button 
+                  type="primary" 
+                  size="small" 
+                  @click="refreshTable('lateEmployees')"
+                  :loading="loading"
+                >
+                  <el-icon><Refresh /></el-icon>
+                </el-button>
+              </div>
             </div>
           </template>
           <div class="late-section">
@@ -226,9 +359,9 @@
               <el-icon>
                 <Sunrise />
               </el-icon>
-              <span>上午迟到 ({{ yesterdayMorningLate.length }}人)</span>
+              <span>上午迟到 ({{ morningLate.length }}人)</span>
             </div>
-            <el-table :data="yesterdayMorningLate" style="width: 100%" height="180">
+            <el-table :data="morningLate" style="width: 100%" height="180">
               <el-table-column prop="name" label="姓名" width="100" />
               <el-table-column prop="employeeId" label="工号" width="100" />
               <el-table-column prop="lateTime" label="迟到时间" />
@@ -240,9 +373,9 @@
               <el-icon>
                 <Moon />
               </el-icon>
-              <span>下午迟到 ({{ yesterdayAfternoonLate.length }}人)</span>
+              <span>下午迟到 ({{ afternoonLate.length }}人)</span>
             </div>
-            <el-table :data="yesterdayAfternoonLate" style="width: 100%" height="180">
+            <el-table :data="afternoonLate" style="width: 100%" height="180">
               <el-table-column prop="name" label="姓名" width="100" />
               <el-table-column prop="employeeId" label="工号" width="100" />
               <el-table-column prop="lateTime" label="迟到时间" />
@@ -252,6 +385,75 @@
       </div>
     </div>
     
+    <!-- 任务完成情况分析 -->
+    <div class="dashboard-flex-container" style="margin-top: 20px;">
+      <div class="dashboard-flex-item">
+        <el-card class="dashboard-card">
+          <template #header>
+            <div class="card-header">
+              <span>按时完成任务占比分析</span>
+              <div class="table-date-filter">
+                <el-date-picker
+                  v-model="tableDateRanges.onTimeTask"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  format="YYYY-MM-DD"
+                  value-format="YYYY-MM-DD"
+                  size="small"
+                  style="width: 200px; margin-right: 8px;"
+                  @change="refreshTable('onTimeTask')"
+                />
+                <el-button 
+                  type="primary" 
+                  size="small" 
+                  @click="refreshTable('onTimeTask')"
+                  :loading="loading"
+                >
+                  <el-icon><Refresh /></el-icon>
+                </el-button>
+              </div>
+            </div>
+          </template>
+          <div ref="onTimeTaskChart" class="chart-container"></div>
+        </el-card>
+      </div>
+
+      <div class="dashboard-flex-item">
+        <el-card class="dashboard-card">
+          <template #header>
+            <div class="card-header">
+              <span>逾期任务占比分析</span>
+              <div class="table-date-filter">
+                <el-date-picker
+                  v-model="tableDateRanges.overdueTask"
+                  type="daterange"
+                  range-separator="至"
+                  start-placeholder="开始日期"
+                  end-placeholder="结束日期"
+                  format="YYYY-MM-DD"
+                  value-format="YYYY-MM-DD"
+                  size="small"
+                  style="width: 200px; margin-right: 8px;"
+                  @change="refreshTable('overdueTask')"
+                />
+                <el-button 
+                  type="primary" 
+                  size="small" 
+                  @click="refreshTable('overdueTask')"
+                  :loading="loading"
+                >
+                  <el-icon><Refresh /></el-icon>
+                </el-button>
+              </div>
+            </div>
+          </template>
+          <div ref="overdueTaskChart" class="chart-container"></div>
+        </el-card>
+      </div>
+    </div>
+
     <!-- 四个设计所人员分布饼图 -->
     <el-card class="dashboard-card" style="margin-top: 20px; width: 100%;">
       <template #header>
@@ -261,22 +463,7 @@
         </div>
       </template>
       <div class="pie-charts-container">
-        <div class="pie-chart-item">
-          <div class="institute-name-vertical">第一研究所</div>
-          <div ref="pieChart1" class="pie-chart"></div>
-        </div>
-        <div class="pie-chart-item">
-          <div class="institute-name-vertical">第二研究所</div>
-          <div ref="pieChart2" class="pie-chart"></div>
-        </div>
-        <div class="pie-chart-item">
-          <div class="institute-name-vertical">第三研究所</div>
-          <div ref="pieChart3" class="pie-chart"></div>
-        </div>
-        <div class="pie-chart-item">
-          <div class="institute-name-vertical">第四研究所</div>
-          <div ref="pieChart4" class="pie-chart"></div>
-        </div>
+        <!-- 饼图将通过JavaScript动态生成 -->
       </div>
     </el-card>
   </div>
@@ -288,11 +475,6 @@ import moment from 'moment'
 import * as echarts from 'echarts'
 import { User, Document, Star, View, Refresh, Sunrise, Moon } from '@element-plus/icons-vue'
 
-// 时间范围筛选
-const dateRange = ref([
-  moment().subtract(7, 'days').format('YYYY-MM-DD'),
-  moment().format('YYYY-MM-DD')
-])
 const loading = ref(false)
 
 // 四个表格数据
@@ -302,8 +484,13 @@ const lateCountData = ref([])
 const yesterdayMorningLate = ref([])
 const yesterdayAfternoonLate = ref([])
 
+const morningLate = ref([])
+const afternoonLate = ref([])
+
 // 图表引用
 const taskHoursChart = ref()
+const onTimeTaskChart = ref()
+const overdueTaskChart = ref()
 const pieChart1 = ref()
 const pieChart2 = ref()
 const pieChart3 = ref()
@@ -311,6 +498,8 @@ const pieChart4 = ref()
 const insufficientTimeEmployees = ref([])
 const qaResolvedData = ref([])
 let chartInstance = null
+let onTimeTaskChartInstance = null
+let overdueTaskChartInstance = null
 let pieChartInstances = []
 
 // 模拟API调用
@@ -357,8 +546,10 @@ const fetchLateCount = async () => {
   lateCountData.value = await mockApiCall(mockData)
 }
 
-// 获取昨日迟到人员
-const fetchYesterdayLate = async () => {
+
+
+// 获取指定日期的迟到人员
+const fetchLateEmployees = async () => {
   const morningData = [
     { name: '张三', employeeId: 'EMP001', lateTime: '08:45' },
     { name: '李四', employeeId: 'EMP002', lateTime: '08:52' },
@@ -376,8 +567,35 @@ const fetchYesterdayLate = async () => {
     mockApiCall(afternoonData)
   ])
 
-  yesterdayMorningLate.value = morning
-  yesterdayAfternoonLate.value = afternoon
+  morningLate.value = morning
+  afternoonLate.value = afternoon
+}
+
+// 根据指定日期获取迟到人员
+const fetchLateEmployeesByDate = async (date) => {
+  const dateStr = moment(date).format('YYYY-MM-DD')
+  console.log(`获取 ${dateStr} 的迟到人员数据`)
+  
+  // 模拟根据日期获取不同数据
+  const morningData = [
+    { name: '张三', employeeId: 'EMP001', lateTime: '08:45' },
+    { name: '李四', employeeId: 'EMP002', lateTime: '08:52' },
+    { name: '王五', employeeId: 'EMP003', lateTime: '09:10' }
+  ]
+
+  const afternoonData = [
+    { name: '赵六', employeeId: 'EMP004', lateTime: '13:25' },
+    { name: '孙七', employeeId: 'EMP005', lateTime: '13:40' },
+    { name: '周八', employeeId: 'EMP008', lateTime: '14:05' }
+  ]
+
+  const [morning, afternoon] = await Promise.all([
+    mockApiCall(morningData),
+    mockApiCall(afternoonData)
+  ])
+
+  morningLate.value = morning
+  afternoonLate.value = afternoon
 }
 
 // 获取任务工时趋势数据
@@ -391,6 +609,30 @@ const fetchTaskHoursTrend = async () => {
     { date: '2024-01-20', 第一研究所: 135, 第二研究所: 108, 第三研究所: 149, 第四研究所: 122 },
     { date: '2024-01-21', 第一研究所: 147, 第二研究所: 116, 第三研究所: 158, 第四研究所: 128 }
   ]
+  return await mockApiCall(trendData)
+}
+
+// 根据时间范围获取任务工时趋势数据
+const fetchTaskHoursTrendByRange = async (startDate, endDate) => {
+  const start = moment(startDate)
+  const end = moment(endDate)
+  const days = end.diff(start, 'days') + 1
+  
+  console.log(`获取任务工时趋势数据，时间范围: ${start.format('YYYY-MM-DD')} 至 ${end.format('YYYY-MM-DD')}，共 ${days} 天`)
+  
+  // 模拟根据时间范围生成数据
+  const trendData = []
+  for (let i = 0; i < days; i++) {
+    const currentDate = start.clone().add(i, 'days')
+    trendData.push({
+      date: currentDate.format('YYYY-MM-DD'),
+      第一研究所: Math.floor(Math.random() * 50) + 100,
+      第二研究所: Math.floor(Math.random() * 40) + 80,
+      第三研究所: Math.floor(Math.random() * 60) + 120,
+      第四研究所: Math.floor(Math.random() * 45) + 90
+    })
+  }
+  
   return await mockApiCall(trendData)
 }
 
@@ -420,19 +662,12 @@ const fetchQAResolvedData = async () => {
   qaResolvedData.value = await mockApiCall(data)
 }
 
-// 格式化日期范围显示
-const formatDateRange = () => {
-  if (!dateRange.value || dateRange.value.length !== 2) return ''
-  return `${dateRange.value[0]} 至 ${dateRange.value[1]}`
-}
 
-// 获取昨日日期
-const getYesterdayDate = () => {
-  return moment().subtract(1, 'days').format('YYYY-MM-DD')
-}
+
+
 
 // 初始化任务工时趋势图表
-const initTaskHoursChart = async () => {
+const initTaskHoursChart = async (startDate, endDate) => {
   await nextTick()
   if (!taskHoursChart.value) return
 
@@ -441,7 +676,11 @@ const initTaskHoursChart = async () => {
   }
 
   chartInstance = echarts.init(taskHoursChart.value)
-  const trendData = await fetchTaskHoursTrend()
+  
+  // 如果有时间范围参数，使用范围数据，否则使用默认数据
+  const trendData = startDate && endDate 
+    ? await fetchTaskHoursTrendByRange(startDate, endDate)
+    : await fetchTaskHoursTrend()
 
   const option = {
     title: {
@@ -535,133 +774,329 @@ const initTaskHoursChart = async () => {
   chartInstance.setOption(option)
 }
 
-// 初始化四个设计所人员分布饼图
-const initPieCharts = async () => {
+// 动态初始化人员分布饼图（支持任意数量研究所）
+const initPieCharts = async (pieData) => {
   await nextTick()
-  
-  // 清理现有的饼图实例
+
+  // 清理现有饼图实例
   pieChartInstances.forEach(instance => {
     if (instance) instance.dispose()
   })
   pieChartInstances = []
 
-  // 模拟四个设计所的人员数据
-  const pieData = [
-    {
-      name: '第一研究所',
-      data: [
-        { value: 120, name: '在册人员' },
-        { value: 45, name: '劳务人员' },
-        { value: 30, name: '外包人员' },
-        { value: 15, name: '集中办公人员' }
-      ]
-    },
-    {
-      name: '第二研究所',
-      data: [
-        { value: 98, name: '在册人员' },
-        { value: 38, name: '劳务人员' },
-        { value: 25, name: '外包人员' },
-        { value: 12, name: '集中办公人员' }
-      ]
-    },
-    {
-      name: '第三研究所',
-      data: [
-        { value: 135, name: '在册人员' },
-        { value: 52, name: '劳务人员' },
-        { value: 35, name: '外包人员' },
-        { value: 18, name: '集中办公人员' }
-      ]
-    },
-    {
-      name: '第四研究所',
-      data: [
-        { value: 110, name: '在册人员' },
-        { value: 42, name: '劳务人员' },
-        { value: 28, name: '外包人员' },
-        { value: 14, name: '集中办公人员' }
-      ]
-    }
-  ]
+  // 清空容器，为动态生成做准备
+  const container = document.querySelector('.pie-charts-container')
+  if (container) container.innerHTML = ''
 
-  const chartRefs = [pieChart1, pieChart2, pieChart3, pieChart4]
-  
-  chartRefs.forEach((chartRef, index) => {
-    if (!chartRef.value) return
-    
-    const instance = echarts.init(chartRef.value)
-    const currentData = pieData[index]
-    
-    const option = {
-      tooltip: {
-        trigger: 'item',
-        formatter: '{a} <br/>{b}: {c} ({d}%)'
-      },
+  if (!pieData || pieData.length === 0) {
+    container.innerHTML = '<div style="text-align: center; color: #909399; padding: 40px;">暂无数据</div>'
+    return
+  }
+
+  // 动态生成饼图DOM并初始化
+  pieData.forEach(item => {
+    // 创建单个饼图容器
+    const itemDiv = document.createElement('div')
+    itemDiv.className = 'pie-chart-item'
+    itemDiv.style.cssText = `
+      flex: 1 1 240px;
+      min-width: 240px;
+      max-width: 320px;
+      height: 320px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    `
+
+    // 研究所名称标签
+    const label = document.createElement('div')
+    label.className = 'institute-name-vertical'
+    label.textContent = item.name
+
+    // 图表容器
+    const chartDiv = document.createElement('div')
+    chartDiv.style.cssText = 'width: 100%; height: 100%; flex: 1;'
+
+    itemDiv.appendChild(label)
+    itemDiv.appendChild(chartDiv)
+    container?.appendChild(itemDiv)
+
+    // 初始化ECharts实例
+    const chart = echarts.init(chartDiv)
+    chart.setOption({
+      tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' },
       legend: {
-          orient: 'vertical',
-          right: 0,
-          top: 'middle',
-          itemWidth: 10,
-          itemHeight: 10,
-          itemGap: 5,
-          textStyle: {
-            fontSize: 10
-          }
-        },
-      series: [
-        {
-          name: currentData.name,
-            type: 'pie',
-            radius: ['28%', '52%'],
-            center: ['33%', '50%'],
-          avoidLabelOverlap: false,
-          itemStyle: {
-            borderColor: '#fff',
-            borderWidth: 1
-          },
-          label: {
-            show: false,
-            position: 'center'
-          },
-          emphasis: {
-            label: {
-              show: true,
-              fontSize: 12,
-              fontWeight: 'bold'
-            }
-          },
-          labelLine: {
-            show: false
-          },
-          data: currentData.data
-        }
-      ],
+        orient: 'vertical',
+        right: 0,
+        top: 'middle',
+        itemWidth: 10,
+        itemHeight: 10,
+        itemGap: 5,
+        textStyle: { fontSize: 10 }
+      },
+      series: [{
+        name: item.name,
+        type: 'pie',
+        radius: ['28%', '52%'],
+        center: ['33%', '50%'],
+        avoidLabelOverlap: false,
+        itemStyle: { borderColor: '#fff', borderWidth: 1 },
+        label: { show: false, position: 'center' },
+        emphasis: { label: { show: true, fontSize: 12, fontWeight: 'bold' } },
+        labelLine: { show: false },
+        data: item.data
+      }],
       color: ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C']
-    }
-    
-    instance.setOption(option)
-    pieChartInstances.push(instance)
+    })
+    pieChartInstances.push(chart)
   })
 }
 
-// 获取所有数据
-const fetchAllData = async () => {
-  loading.value = true
-  try {
-    await Promise.all([
-      fetchCodeEquivalent(),
-      fetchTop5Personal(),
-      fetchLateCount(),
-      fetchYesterdayLate(),
-      fetchInsufficientTimeEmployees(),
-      fetchQAResolvedData()
-    ])
-    await initTaskHoursChart()
-  } finally {
-    loading.value = false
+
+// 从后端获取饼图数据并动态生成
+  const fetchPieData = async () => {
+    try {
+      // 模拟API延迟
+      await new Promise(resolve => setTimeout(resolve, 600))
+
+      // 这里替换为真实API调用，例如：
+      // const res = await fetch('/api/dashboard/institute-personnel-stats').then(r => r.json())
+      // return res.data
+
+      // 模拟后端返回任意数量研究所的数据
+      // 可以测试不同数量的研究所：
+      const mockData = [
+        { name: '第一研究所', data: [{ value: 120, name: '在册人员' }, { value: 45, name: '劳务人员' }, { value: 30, name: '外包人员' }, { value: 15, name: '集中办公人员' }] },
+        { name: '第二研究所', data: [{ value: 98, name: '在册人员' }, { value: 38, name: '劳务人员' }, { value: 25, name: '外包人员' }, { value: 12, name: '集中办公人员' }] },
+        { name: '第三研究所', data: [{ value: 135, name: '在册人员' }, { value: 52, name: '劳务人员' }, { value: 35, name: '外包人员' }, { value: 18, name: '集中办公人员' }] },
+        { name: '第四研究所', data: [{ value: 110, name: '在册人员' }, { value: 42, name: '劳务人员' }, { value: 28, name: '外包人员' }, { value: 14, name: '集中办公人员' }] }
+      ]
+      
+      // 测试不同数量：可以改为3个或5个研究所
+      // return mockData.slice(0, 3) // 3个研究所
+      return mockData // 4个研究所
+    } catch (e) {
+      console.error('获取饼图数据失败:', e)
+      // 错误时使用默认数据
+      return [{ name: '暂无数据', data: [{ value: 0, name: '暂无数据' }] }]
+    }
   }
-}
+
+  // 获取所有数据
+    const fetchAllData = async () => {
+      loading.value = true
+      try {
+        await Promise.all([
+          fetchCodeEquivalent(),
+          fetchTop5Personal(),
+          fetchLateCount(),
+          fetchLateEmployees(),
+          fetchInsufficientTimeEmployees(),
+          fetchQAResolvedData()
+        ])
+        
+        // 获取饼图数据并动态生成
+        const pieData = await fetchPieData()
+        await initPieCharts(pieData)
+        
+        // 使用默认时间范围初始化任务工时趋势图表
+        await initTaskHoursChart(tableDateRanges.value.taskHours[0], tableDateRanges.value.taskHours[1])
+        
+        // 初始化新饼图
+        await initOnTimeTaskChart(tableDateRanges.value.onTimeTask[0], tableDateRanges.value.onTimeTask[1])
+        await initOverdueTaskChart(tableDateRanges.value.overdueTask[0], tableDateRanges.value.overdueTask[1])
+      } finally {
+        loading.value = false
+      }
+    }
+
+    // 格式化日期范围显示
+    const formatTableDateRange = (dateRange) => {
+      if (!dateRange || dateRange.length !== 2) return ''
+      const start = new Date(dateRange[0])
+      const end = new Date(dateRange[1])
+      return `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}-${String(start.getDate()).padStart(2, '0')} 至 ${end.getFullYear()}-${String(end.getMonth() + 1).padStart(2, '0')}-${String(end.getDate()).padStart(2, '0')}`
+    }
+
+    // 测试用：动态切换研究所数量（开发调试用）
+  const testPieData = async (count) => {
+    const allData = [
+      { name: '第一研究所', data: [{ value: 120, name: '在册人员' }, { value: 45, name: '劳务人员' }, { value: 30, name: '外包人员' }, { value: 15, name: '集中办公人员' }] },
+      { name: '第二研究所', data: [{ value: 98, name: '在册人员' }, { value: 38, name: '劳务人员' }, { value: 25, name: '外包人员' }, { value: 12, name: '集中办公人员' }] },
+      { name: '第三研究所', data: [{ value: 135, name: '在册人员' }, { value: 52, name: '劳务人员' }, { value: 35, name: '外包人员' }, { value: 18, name: '集中办公人员' }] },
+      { name: '第四研究所', data: [{ value: 110, name: '在册人员' }, { value: 42, name: '劳务人员' }, { value: 28, name: '外包人员' }, { value: 14, name: '集中办公人员' }] },
+      { name: '第五研究所', data: [{ value: 95, name: '在册人员' }, { value: 35, name: '劳务人员' }, { value: 22, name: '外包人员' }, { value: 10, name: '集中办公人员' }] }
+    ]
+    
+    const testData = allData.slice(0, count)
+    await initPieCharts(testData)
+  }
+
+  // 初始化按时完成任务占比饼图
+  const initOnTimeTaskChart = async (startDate, endDate) => {
+    try {
+      // 模拟API调用获取数据
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // 模拟数据：按时完成任务数和总任务数
+      const onTimeCount = Math.floor(Math.random() * 500) + 200
+      const totalCount = onTimeCount + Math.floor(Math.random() * 200) + 50
+      const notOnTimeCount = totalCount - onTimeCount
+      
+      const chartData = [
+        { value: onTimeCount, name: '按时完成任务' },
+        { value: notOnTimeCount, name: '未按时完成任务' }
+      ]
+      
+      if (!onTimeTaskChart.value) {
+        console.error('按时完成任务图表容器未找到')
+        return
+      }
+      
+      // 清理旧实例
+      if (onTimeTaskChartInstance) {
+        onTimeTaskChartInstance.dispose()
+      }
+      
+      onTimeTaskChartInstance = echarts.init(onTimeTaskChart.value)
+      
+      const option = {
+        title: {
+          text: `任务总数: ${totalCount}`,
+          left: 'center',
+          top: 20,
+          textStyle: {
+            fontSize: 14,
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+          orient: 'horizontal',
+          left: 'center',
+          top: 50,
+          itemGap: 20
+        },
+        series: [
+          {
+            name: '按时完成任务分析',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['50%', '65%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: true,
+              formatter: '{b}: {d}%'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            data: chartData
+          }
+        ],
+        color: ['#67C23A', '#F56C6C']
+      }
+      
+      onTimeTaskChartInstance.setOption(option)
+      
+    } catch (error) {
+      console.error('初始化按时完成任务图表失败:', error)
+    }
+  }
+  
+  // 初始化逾期任务占比饼图
+  const initOverdueTaskChart = async (startDate, endDate) => {
+    try {
+      // 模拟API调用获取数据
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // 模拟数据：逾期任务数和总任务数
+      const overdueCount = Math.floor(Math.random() * 100) + 20
+      const totalCount = overdueCount + Math.floor(Math.random() * 600) + 300
+      const normalCount = totalCount - overdueCount
+      
+      const chartData = [
+        { value: overdueCount, name: '逾期任务' },
+        { value: normalCount, name: '正常任务' }
+      ]
+      
+      if (!overdueTaskChart.value) {
+        console.error('逾期任务图表容器未找到')
+        return
+      }
+      
+      // 清理旧实例
+      if (overdueTaskChartInstance) {
+        overdueTaskChartInstance.dispose()
+      }
+      
+      overdueTaskChartInstance = echarts.init(overdueTaskChart.value)
+      
+      const option = {
+        title: {
+          text: `任务总数: ${totalCount}`,
+          left: 'center',
+          top: 20,
+          textStyle: {
+            fontSize: 14,
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c} ({d}%)'
+        },
+        legend: {
+          orient: 'horizontal',
+          left: 'center',
+          top: 50,
+          itemGap: 20
+        },
+        series: [
+          {
+            name: '逾期任务分析',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['50%', '65%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: true,
+              formatter: '{b}: {d}%'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            data: chartData
+          }
+        ],
+        color: ['#F56C6C', '#409EFF']
+      }
+      
+      overdueTaskChartInstance.setOption(option)
+      
+    } catch (error) {
+      console.error('初始化逾期任务图表失败:', error)
+    }
+  }
 
 // 统一的resize事件处理器
 const handleResize = () => {
@@ -669,7 +1104,82 @@ const handleResize = () => {
   pieChartInstances.forEach(instance => {
     if (instance) instance.resize()
   })
+  if (onTimeTaskChartInstance) onTimeTaskChartInstance.resize()
+  if (overdueTaskChartInstance) overdueTaskChartInstance.resize()
 }
+
+  // 为每个表格创建独立的时间筛选器
+  const tableDateRanges = ref({
+    codeEquivalent: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+    top5Personal: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+    lateCount: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+    lateEmployees: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+    insufficientTime: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+    qaResolved: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+    taskHours: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+    onTimeTask: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+    overdueTask: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()]
+  })
+
+  // 迟到人员单日期选择
+  const lateEmployeeDate = ref(new Date(Date.now() - 24 * 60 * 60 * 1000))
+
+  // 为每个表格创建独立的刷新函数
+  const refreshTable = async (tableName) => {
+    let dateInfo = ''
+    if (tableName === 'lateEmployees') {
+      dateInfo = `日期: ${moment(lateEmployeeDate.value).format('YYYY-MM-DD')}`
+    } else if (tableName === 'taskHours') {
+      const dateRange = tableDateRanges.value[tableName]
+      dateInfo = `时间范围: ${moment(dateRange[0]).format('YYYY-MM-DD')} 至 ${moment(dateRange[1]).format('YYYY-MM-DD')}`
+    } else if (tableName === 'onTimeTask' || tableName === 'overdueTask') {
+      const dateRange = tableDateRanges.value[tableName]
+      dateInfo = `时间范围: ${moment(dateRange[0]).format('YYYY-MM-DD')} 至 ${moment(dateRange[1]).format('YYYY-MM-DD')}`
+    } else {
+      const dateRange = tableDateRanges.value[tableName]
+      dateInfo = `时间范围: ${moment(dateRange[0]).format('YYYY-MM-DD')} 至 ${moment(dateRange[1]).format('YYYY-MM-DD')}`
+    }
+    
+    console.log(`刷新 ${tableName} 表格，${dateInfo}`)
+    
+    switch (tableName) {
+      case 'codeEquivalent':
+        await fetchCodeEquivalent()
+        break
+      case 'top5Personal':
+        await fetchTop5Personal()
+        break
+      case 'lateCount':
+        await fetchLateCount()
+        break
+      case 'lateEmployees':
+        await fetchLateEmployeesByDate(lateEmployeeDate.value)
+        break
+      case 'insufficientTime':
+        await fetchInsufficientTimeEmployees()
+        break
+      case 'qaResolved':
+        await fetchQAResolvedData()
+        break
+      case 'taskHours':
+        if (tableDateRanges.taskHours && tableDateRanges.taskHours.length === 2) {
+          await initTaskHoursChart(tableDateRanges.taskHours[0], tableDateRanges.taskHours[1])
+        } else {
+          await initTaskHoursChart()
+        }
+        break
+      case 'onTimeTask':
+        if (tableDateRanges.onTimeTask && tableDateRanges.onTimeTask.length === 2) {
+          await initOnTimeTaskChart(tableDateRanges.onTimeTask[0], tableDateRanges.onTimeTask[1])
+        }
+        break
+      case 'overdueTask':
+        if (tableDateRanges.overdueTask && tableDateRanges.overdueTask.length === 2) {
+          await initOverdueTaskChart(tableDateRanges.overdueTask[0], tableDateRanges.overdueTask[1])
+        }
+        break
+    }
+  }
 
 // 清理资源
 const cleanupChart = () => {
@@ -686,6 +1196,17 @@ const cleanupChart = () => {
     }
   })
   pieChartInstances = []
+  
+  // 清理新饼图实例
+  if (onTimeTaskChartInstance) {
+    onTimeTaskChartInstance.dispose()
+    onTimeTaskChartInstance = null
+  }
+  
+  if (overdueTaskChartInstance) {
+    overdueTaskChartInstance.dispose()
+    overdueTaskChartInstance = null
+  }
   
   // 清理事件监听器
   window.removeEventListener('resize', handleResize)
@@ -856,6 +1377,16 @@ onUnmounted(() => {
   color: #303133;
 }
 
+.table-date-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-date-filter .el-date-picker {
+  flex-shrink: 0;
+}
+
 .number-text {
   font-weight: bold;
   color: #409EFF;
@@ -904,12 +1435,11 @@ onUnmounted(() => {
 
 .pie-charts-container {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   gap: 16px;
   padding: 20px;
-  justify-content: space-between;
+  justify-content: center;
   align-items: flex-start;
-  overflow-x: auto;
 }
 
 .pie-chart-item {

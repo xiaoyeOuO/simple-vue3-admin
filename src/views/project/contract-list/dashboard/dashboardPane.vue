@@ -82,6 +82,99 @@
         <div ref="workHourChartRef" class="chart"></div>
       </el-card>
     </div>
+
+    <!-- 新增图表区域 -->
+    <div class="chart-container new-charts-container">
+      <!-- 产品线里程碑统计 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>产品线里程碑逾期统计</span>
+          </div>
+        </template>
+        <div ref="productMilestoneChartRef" class="chart"></div>
+      </el-card>
+
+      <!-- 有问必答系统回复统计 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>有问必答48小时内回复统计</span>
+          </div>
+        </template>
+        <div ref="qaReplyChartRef" class="chart"></div>
+      </el-card>
+
+      <!-- 有问必答系统解决统计 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>有问必答48小时内解决统计</span>
+          </div>
+        </template>
+        <div ref="qaResolveChartRef" class="chart"></div>
+      </el-card>
+
+      <!-- 项目里程碑逾期统计 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>项目里程碑逾期统计</span>
+          </div>
+        </template>
+        <div ref="projectMilestoneChartRef" class="chart"></div>
+      </el-card>
+
+      <!-- 缺陷类型分布统计 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>缺陷类型分布统计</span>
+          </div>
+        </template>
+        <div ref="bugTypeChartRef" class="chart"></div>
+      </el-card>
+
+      <!-- 缺陷处理耗时分布 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>缺陷处理耗时分布</span>
+          </div>
+        </template>
+        <div ref="bugDurationChartRef" class="chart"></div>
+      </el-card>
+
+      <!-- 任务工时统计 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>任务工时统计</span>
+          </div>
+        </template>
+        <div ref="taskHoursChartRef" class="chart"></div>
+      </el-card>
+
+      <!-- 按时完成任务统计 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>按时完成任务统计</span>
+          </div>
+        </template>
+        <div ref="onTimeTaskChartRef" class="chart"></div>
+      </el-card>
+
+      <!-- 逾期任务统计 -->
+      <el-card class="chart-card" shadow="hover">
+        <template #header>
+          <div class="card-header">
+            <span>逾期任务统计</span>
+          </div>
+        </template>
+        <div ref="overdueTaskChartRef" class="chart"></div>
+      </el-card>
+    </div>
   </div>
 </template>
 
@@ -103,6 +196,10 @@ const props = defineProps({
   projectId: {
     type: [String, Number],
     default: ''
+  },
+  selectedModule: {
+    type: Array,
+    default: () => []
   }
 })
 
@@ -124,6 +221,27 @@ const workHourChartRef = ref()
 let bugChartInstance = null
 let taskChartInstance = null
 let workHourChartInstance = null
+
+// 新增图表实例
+const productMilestoneChartRef = ref()
+const qaReplyChartRef = ref()
+const qaResolveChartRef = ref()
+const projectMilestoneChartRef = ref()
+const bugTypeChartRef = ref()
+const bugDurationChartRef = ref()
+const taskHoursChartRef = ref()
+const onTimeTaskChartRef = ref()
+const overdueTaskChartRef = ref()
+
+let productMilestoneChartInstance = null
+let qaReplyChartInstance = null
+let qaResolveChartInstance = null
+let projectMilestoneChartInstance = null
+let bugTypeChartInstance = null
+let bugDurationChartInstance = null
+let taskHoursChartInstance = null
+let onTimeTaskChartInstance = null
+let overdueTaskChartInstance = null
 
 // 生成模拟数据
 const generateChartData = () => {
@@ -161,206 +279,544 @@ const generateChartData = () => {
   return { dates, bugData, taskData, workHourData }
 }
 
-// 图表配置
-const getChartOption = (type, title, data, dates) => {
-  const baseOption = {
-    title: { text: title, left: 'center' },
+// 饼图专用配置
+const getPieChartOption = (title, data) => {
+  return {
+    title: {
+      text: title,
+      left: 'center',
+      textStyle: {
+        fontSize: 14,
+        fontWeight: 'bold'
+      }
+    },
     tooltip: {
-      trigger: type === 'pie' ? 'item' : 'axis',
-      formatter: type === 'pie' 
-        ? '{a} <br/>{b}: {c} ({d}%)'
-        : '{b}: {c}'
+      trigger: 'item',
+      formatter: '{a} <br/>{b}: {c} ({d}%)'
     },
     legend: {
-      data: [title],
-      bottom: 10
-    }
-  }
-
-  if (type === 'pie') {
-    // 饼图数据处理
-    const pieData = data.map((value, index) => ({
-      name: dates[index],
-      value: value
-    }))
-    
-    return {
-      ...baseOption,
-      series: [{
+      orient: 'vertical',
+      left: 'left',
+      top: 'middle'
+    },
+    color: ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C'],
+    series: [
+      {
         name: title,
         type: 'pie',
-        radius: '50%',
-        data: pieData,
-        emphasis: {
-          itemStyle: {
-            shadowBlur: 10,
-            shadowOffsetX: 0,
-            shadowColor: 'rgba(0, 0, 0, 0.5)'
-          }
-        }
-      }]
-    }
-  } else {
-    // 折线图或柱状图
-    return {
-      ...baseOption,
-      xAxis: {
-        type: 'category',
-        data: dates,
-        boundaryGap: type === 'bar'
-      },
-      yAxis: {
-        type: 'value',
-        name: title.includes('工时') ? '小时' : '数量'
-      },
-      series: [{
-        name: title,
-        type: type,
-        data: data,
-        smooth: true,
+        radius: ['40%', '70%'],
+        center: ['60%', '50%'],
+        avoidLabelOverlap: false,
         itemStyle: {
-          color: title.includes('缺陷') ? '#f56c6c' : 
-                 title.includes('任务') ? '#409eff' : '#67c23a'
+          borderColor: '#fff',
+          borderWidth: 2
         },
-        areaStyle: type === 'line' ? {
-          opacity: 0.3
-        } : undefined
-      }]
-    }
+        label: {
+          show: false,
+          position: 'center'
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: '16',
+            fontWeight: 'bold'
+          }
+        },
+        labelLine: {
+          show: false
+        },
+        data: data
+      }
+    ]
   }
 }
 
-// 初始化图表
-const initCharts = () => {
+// 折线图专用配置
+const getLineChartOption = (title, data, dates) => {
+  return {
+    title: {
+      text: title,
+      left: 'center',
+      textStyle: {
+        fontSize: 14,
+        fontWeight: 'bold'
+      }
+    },
+    tooltip: {
+      trigger: 'axis',
+      formatter: '{b}: {c}小时'
+    },
+    grid: {
+      left: '3%',
+      right: '4%',
+      bottom: '3%',
+      containLabel: true
+    },
+    xAxis: {
+      type: 'category',
+      boundaryGap: false,
+      data: dates
+    },
+    yAxis: {
+      type: 'value',
+      name: '工时'
+    },
+    series: [
+      {
+        name: title,
+        type: 'line',
+        smooth: true,
+        symbol: 'circle',
+        symbolSize: 8,
+        itemStyle: {
+          color: '#409EFF'
+        },
+        areaStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: 'rgba(64, 158, 255, 0.3)' },
+            { offset: 1, color: 'rgba(64, 158, 255, 0.1)' }
+          ])
+        },
+        data: data
+      }
+    ]
+  }
+}
+
+// 生成新图表的模拟数据
+const generateNewChartData = () => {
+  // 产品线里程碑逾期统计
+  const productMilestoneData = [
+    { name: '逾期节点', value: Math.floor(Math.random() * 20) + 5 },
+    { name: '正常节点', value: Math.floor(Math.random() * 50) + 30 }
+  ]
+
+  // 有问必答系统48小时内回复统计
+  const qaReplyData = [
+    { name: '48小时内回复', value: Math.floor(Math.random() * 80) + 60 },
+    { name: '48小时后回复', value: Math.floor(Math.random() * 30) + 10 }
+  ]
+
+  // 有问必答系统48小时内解决统计
+  const qaResolveData = [
+    { name: '48小时内解决', value: Math.floor(Math.random() * 60) + 40 },
+    { name: '48小时后解决', value: Math.floor(Math.random() * 40) + 20 }
+  ]
+
+  // 项目里程碑逾期统计
+  const projectMilestoneData = [
+    { name: '逾期节点', value: Math.floor(Math.random() * 15) + 3 },
+    { name: '正常节点', value: Math.floor(Math.random() * 40) + 25 }
+  ]
+
+  // 缺陷类型分布统计
+  const bugTypeData = [
+    { name: '紧急', value: Math.floor(Math.random() * 20) + 5 },
+    { name: '高级', value: Math.floor(Math.random() * 30) + 15 },
+    { name: '中级', value: Math.floor(Math.random() * 40) + 20 },
+    { name: '低级', value: Math.floor(Math.random() * 25) + 10 }
+  ]
+
+  // 缺陷处理耗时分布
+  const bugDurationData = [
+    { name: '5天内', value: Math.floor(Math.random() * 30) + 20 },
+    { name: '5-15天', value: Math.floor(Math.random() * 25) + 15 },
+    { name: '15-30天', value: Math.floor(Math.random() * 20) + 10 },
+    { name: '30天及以上', value: Math.floor(Math.random() * 15) + 5 }
+  ]
+
+  // 任务工时统计数据（折线图）
+  const taskHoursDates = []
+  const taskHoursData = []
+  const days = 30
+  const today = new Date()
+  
+  for (let i = days - 1; i >= 0; i--) {
+    const date = new Date(today)
+    date.setDate(date.getDate() - i)
+    taskHoursDates.push(date.toLocaleDateString('zh-CN', { month: '2-digit', day: '2-digit' }))
+    taskHoursData.push(Math.floor(Math.random() * 40) + 10)
+  }
+
+  // 按时完成任务统计
+  const onTimeTaskData = [
+    { name: '按时完成', value: Math.floor(Math.random() * 60) + 40 },
+    { name: '未按时完成', value: Math.floor(Math.random() * 30) + 10 }
+  ]
+
+  // 逾期任务统计
+  const overdueTaskData = [
+    { name: '逾期任务', value: Math.floor(Math.random() * 25) + 5 },
+    { name: '正常任务', value: Math.floor(Math.random() * 50) + 30 }
+  ]
+
+  return {
+    productMilestoneData,
+    qaReplyData,
+    qaResolveData,
+    projectMilestoneData,
+    bugTypeData,
+    bugDurationData,
+    taskHoursDates,
+    taskHoursData,
+    onTimeTaskData,
+    overdueTaskData
+  }
+}
+
+// 初始化原有图表
+const initOriginalCharts = () => {
   const { dates, bugData, taskData, workHourData } = generateChartData()
 
-  // 初始化缺陷图表
+  // 缺陷数量变化趋势图
   if (bugChartRef.value) {
     bugChartInstance = echarts.init(bugChartRef.value)
-    bugChartInstance.setOption(getChartOption('line', '缺陷数量', bugData, dates))
+    const bugOption = {
+      title: { text: '缺陷数量变化趋势' },
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'category', data: dates },
+      yAxis: { type: 'value' },
+      series: [{
+        name: '缺陷数量',
+        type: bugChartType.value,
+        data: bugData,
+        smooth: true,
+        itemStyle: { color: '#F56C6C' }
+      }]
+    }
+    bugChartInstance.setOption(bugOption)
   }
 
-  // 初始化任务图表
+  // 任务完成数量变化趋势图
   if (taskChartRef.value) {
     taskChartInstance = echarts.init(taskChartRef.value)
-    taskChartInstance.setOption(getChartOption('line', '任务完成数量', taskData, dates))
+    const taskOption = {
+      title: { text: '任务完成数量变化趋势' },
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'category', data: dates },
+      yAxis: { type: 'value' },
+      series: [{
+        name: '任务完成数量',
+        type: taskChartType.value,
+        data: taskData,
+        smooth: true,
+        itemStyle: { color: '#67C23A' }
+      }]
+    }
+    taskChartInstance.setOption(taskOption)
   }
 
-  // 初始化工时图表
+  // 实际工时变化趋势图
   if (workHourChartRef.value) {
     workHourChartInstance = echarts.init(workHourChartRef.value)
-    workHourChartInstance.setOption(getChartOption('line', '实际工时', workHourData, dates))
+    const workHourOption = {
+      title: { text: '实际工时变化趋势' },
+      tooltip: { trigger: 'axis' },
+      xAxis: { type: 'category', data: dates },
+      yAxis: { type: 'value' },
+      series: [{
+        name: '实际工时',
+        type: workHourChartType.value,
+        data: workHourData,
+        smooth: true,
+        itemStyle: { color: '#409EFF' }
+      }]
+    }
+    workHourChartInstance.setOption(workHourOption)
   }
 }
 
-// 更新图表
-const updateCharts = () => {
+// 初始化新图表
+const initNewCharts = () => {
+  const {
+    productMilestoneData,
+    qaReplyData,
+    qaResolveData,
+    projectMilestoneData,
+    bugTypeData,
+    bugDurationData,
+    taskHoursDates,
+    taskHoursData,
+    onTimeTaskData,
+    overdueTaskData
+  } = generateNewChartData()
+
+  // 产品线里程碑逾期统计
+  if (productMilestoneChartRef.value) {
+    productMilestoneChartInstance = echarts.init(productMilestoneChartRef.value)
+    productMilestoneChartInstance.setOption(getPieChartOption('产品线里程碑逾期统计', productMilestoneData))
+  }
+
+  // 有问必答系统48小时内回复统计
+  if (qaReplyChartRef.value) {
+    qaReplyChartInstance = echarts.init(qaReplyChartRef.value)
+    qaReplyChartInstance.setOption(getPieChartOption('有问必答48小时内回复统计', qaReplyData))
+  }
+
+  // 有问必答系统48小时内解决统计
+  if (qaResolveChartRef.value) {
+    qaResolveChartInstance = echarts.init(qaResolveChartRef.value)
+    qaResolveChartInstance.setOption(getPieChartOption('有问必答48小时内解决统计', qaResolveData))
+  }
+
+  // 项目里程碑逾期统计
+  if (projectMilestoneChartRef.value) {
+    projectMilestoneChartInstance = echarts.init(projectMilestoneChartRef.value)
+    projectMilestoneChartInstance.setOption(getPieChartOption('项目里程碑逾期统计', projectMilestoneData))
+  }
+
+  // 缺陷类型分布统计
+  if (bugTypeChartRef.value) {
+    bugTypeChartInstance = echarts.init(bugTypeChartRef.value)
+    bugTypeChartInstance.setOption(getPieChartOption('缺陷类型分布统计', bugTypeData))
+  }
+
+  // 缺陷处理耗时分布
+  if (bugDurationChartRef.value) {
+    bugDurationChartInstance = echarts.init(bugDurationChartRef.value)
+    bugDurationChartInstance.setOption(getPieChartOption('缺陷处理耗时分布', bugDurationData))
+  }
+
+  // 任务工时统计（折线图）
+  if (taskHoursChartRef.value) {
+    taskHoursChartInstance = echarts.init(taskHoursChartRef.value)
+    taskHoursChartInstance.setOption(getLineChartOption('任务工时统计', taskHoursData, taskHoursDates))
+  }
+
+  // 按时完成任务统计
+  if (onTimeTaskChartRef.value) {
+    onTimeTaskChartInstance = echarts.init(onTimeTaskChartRef.value)
+    onTimeTaskChartInstance.setOption(getPieChartOption('按时完成任务统计', onTimeTaskData))
+  }
+
+  // 逾期任务统计
+  if (overdueTaskChartRef.value) {
+    overdueTaskChartInstance = echarts.init(overdueTaskChartRef.value)
+    overdueTaskChartInstance.setOption(getPieChartOption('逾期任务统计', overdueTaskData))
+  }
+}
+
+// 初始化所有图表
+const initCharts = () => {
+  initOriginalCharts()
+  initNewCharts()
+}
+
+// 更新原有图表
+const updateOriginalCharts = () => {
   const { dates, bugData, taskData, workHourData } = generateChartData()
 
+  // 更新缺陷数量变化趋势图
   if (bugChartInstance) {
-    bugChartInstance.setOption(getChartOption(bugChartType.value, '缺陷数量', bugData, dates))
+    const bugOption = {
+      xAxis: { data: dates },
+      series: [{ data: bugData, type: bugChartType.value }]
+    }
+    bugChartInstance.setOption(bugOption)
   }
 
+  // 更新任务完成数量变化趋势图
   if (taskChartInstance) {
-    taskChartInstance.setOption(getChartOption(taskChartType.value, '任务完成数量', taskData, dates))
+    const taskOption = {
+      xAxis: { data: dates },
+      series: [{ data: taskData, type: taskChartType.value }]
+    }
+    taskChartInstance.setOption(taskOption)
   }
 
+  // 更新实际工时变化趋势图
   if (workHourChartInstance) {
-    workHourChartInstance.setOption(getChartOption(workHourChartType.value, '实际工时', workHourData, dates))
+    const workHourOption = {
+      xAxis: { data: dates },
+      series: [{ data: workHourData, type: workHourChartType.value }]
+    }
+    workHourChartInstance.setOption(workHourOption)
   }
 }
 
-// 监听图表类型变化
-watch([bugChartType, taskChartType, workHourChartType], () => {
-  nextTick(() => {
-    updateCharts()
-  })
-})
+// 更新新图表
+const updateNewCharts = () => {
+  const {
+    productMilestoneData,
+    qaReplyData,
+    qaResolveData,
+    projectMilestoneData,
+    bugTypeData,
+    bugDurationData,
+    taskHoursDates,
+    taskHoursData,
+    onTimeTaskData,
+    overdueTaskData
+  } = generateNewChartData()
 
-// 时间范围变化处理
+  // 更新产品线里程碑逾期统计
+  if (productMilestoneChartInstance) {
+    productMilestoneChartInstance.setOption(getPieChartOption('产品线里程碑逾期统计', productMilestoneData))
+  }
+
+  // 更新有问必答系统48小时内回复统计
+  if (qaReplyChartInstance) {
+    qaReplyChartInstance.setOption(getPieChartOption('有问必答48小时内回复统计', qaReplyData))
+  }
+
+  // 更新有问必答系统48小时内解决统计
+  if (qaResolveChartInstance) {
+    qaResolveChartInstance.setOption(getPieChartOption('有问必答48小时内解决统计', qaResolveData))
+  }
+
+  // 更新项目里程碑逾期统计
+  if (projectMilestoneChartInstance) {
+    projectMilestoneChartInstance.setOption(getPieChartOption('项目里程碑逾期统计', projectMilestoneData))
+  }
+
+  // 更新缺陷类型分布统计
+  if (bugTypeChartInstance) {
+    bugTypeChartInstance.setOption(getPieChartOption('缺陷类型分布统计', bugTypeData))
+  }
+
+  // 更新缺陷处理耗时分布
+  if (bugDurationChartInstance) {
+    bugDurationChartInstance.setOption(getPieChartOption('缺陷处理耗时分布', bugDurationData))
+  }
+
+  // 更新任务工时统计
+  if (taskHoursChartInstance) {
+    taskHoursChartInstance.setOption(getLineChartOption('任务工时统计', taskHoursData, taskHoursDates))
+  }
+
+  // 更新按时完成任务统计
+  if (onTimeTaskChartInstance) {
+    onTimeTaskChartInstance.setOption(getPieChartOption('按时完成任务统计', onTimeTaskData))
+  }
+
+  // 更新逾期任务统计
+  if (overdueTaskChartInstance) {
+    overdueTaskChartInstance.setOption(getPieChartOption('逾期任务统计', overdueTaskData))
+  }
+}
+
+// 更新所有图表
+const updateCharts = () => {
+  updateOriginalCharts()
+  updateNewCharts()
+}
+
+// 处理时间范围变化
 const handleTimeRangeChange = () => {
   if (selectedTimeRange.value !== 'custom') {
-    refreshData()
+    updateCharts()
   }
 }
 
-// 自定义日期范围变化处理
+// 处理自定义日期变化
 const handleCustomDateChange = () => {
-  if (customDateRange.value && customDateRange.value.length === 2) {
-    refreshData()
+  if (selectedTimeRange.value === 'custom' && customDateRange.value && customDateRange.value.length === 2) {
+    updateCharts()
   }
 }
 
 // 刷新数据
 const refreshData = () => {
   loading.value = true
-  nextTick(() => {
+  setTimeout(() => {
     updateCharts()
-    setTimeout(() => {
-      loading.value = false
-    }, 500)
-  })
+    loading.value = false
+  }, 500)
 }
 
-// 响应式处理
+// 处理窗口大小变化
 const handleResize = () => {
-  bugChartInstance?.resize()
-  taskChartInstance?.resize()
-  workHourChartInstance?.resize()
-}
-
-// 强制重新调整图表尺寸
-const forceResize = () => {
   nextTick(() => {
-    setTimeout(() => {
-      bugChartInstance?.resize()
-      taskChartInstance?.resize()
-      workHourChartInstance?.resize()
-    }, 100)
+    bugChartInstance?.resize()
+    taskChartInstance?.resize()
+    workHourChartInstance?.resize()
+    productMilestoneChartInstance?.resize()
+    qaReplyChartInstance?.resize()
+    qaResolveChartInstance?.resize()
+    projectMilestoneChartInstance?.resize()
+    bugTypeChartInstance?.resize()
+    bugDurationChartInstance?.resize()
+    taskHoursChartInstance?.resize()
+    onTimeTaskChartInstance?.resize()
+    overdueTaskChartInstance?.resize()
   })
 }
 
-onMounted(() => {
-  initCharts()
-  window.addEventListener('resize', handleResize)
-  
-  // 监听标签页切换，强制重新调整尺寸
-  const observer = new MutationObserver(() => {
-    forceResize()
-  })
-  
-  // 观察图表容器的可见性变化
-  const chartContainer = document.querySelector('.chart-container')
-  if (chartContainer) {
-    observer.observe(chartContainer, { 
-      attributes: true, 
-      attributeFilter: ['style', 'class'] 
-    })
-  }
-  
-  // 延迟执行一次resize确保尺寸正确
-  forceResize()
-})
+// 强制重绘图表
+const forceResize = () => {
+  setTimeout(() => {
+    handleResize()
+  }, 100)
+}
 
-// 清理
+// 清理图表实例
 const cleanup = () => {
-  window.removeEventListener('resize', handleResize)
   bugChartInstance?.dispose()
   taskChartInstance?.dispose()
   workHourChartInstance?.dispose()
+  productMilestoneChartInstance?.dispose()
+  qaReplyChartInstance?.dispose()
+  qaResolveChartInstance?.dispose()
+  projectMilestoneChartInstance?.dispose()
+  bugTypeChartInstance?.dispose()
+  bugDurationChartInstance?.dispose()
+  taskHoursChartInstance?.dispose()
+  onTimeTaskChartInstance?.dispose()
+  overdueTaskChartInstance?.dispose()
 }
 
-// 暴露方法
+// 监听图表类型变化
+watch(bugChartType, () => {
+  updateOriginalCharts()
+})
+
+watch(taskChartType, () => {
+  updateOriginalCharts()
+})
+
+watch(workHourChartType, () => {
+  updateOriginalCharts()
+})
+
+// 生命周期钩子
+onMounted(() => {
+  nextTick(() => {
+    initCharts()
+  })
+})
+
+// 监听窗口大小变化
+if (typeof window !== 'undefined') {
+  window.addEventListener('resize', handleResize)
+}
+
+// 监听模块筛选变化
+watch(() => props.selectedModule, () => {
+  nextTick(() => {
+    updateCharts()
+  })
+}, { deep: true })
+
+// 组件卸载时清理
+if (typeof window !== 'undefined') {
+  window.removeEventListener('resize', handleResize)
+  cleanup()
+}
+
+// 暴露方法给父组件
 defineExpose({
-  updateCharts,
-  cleanup
+  refreshData,
+  forceResize
 })
 </script>
 
 <style scoped>
 .dashboard-pane {
   padding: 20px;
+  background-color: #f5f7fa;
+  min-height: 100vh;
 }
+
 .filter-card {
   margin-bottom: 20px;
   border-radius: 8px;
@@ -369,7 +825,7 @@ defineExpose({
 .filter-container {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 20px;
   flex-wrap: wrap;
 }
 
@@ -380,25 +836,38 @@ defineExpose({
 }
 
 .filter-label {
+  font-size: 14px;
   font-weight: 500;
   color: #606266;
-  white-space: nowrap;
 }
 
 .chart-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 20px;
+  margin-bottom: 20px;
+}
+
+.new-charts-container {
+  margin-top: 20px;
 }
 
 .chart-card {
   border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  font-weight: 600;
+  color: #303133;
 }
 
 .chart {
@@ -406,19 +875,36 @@ defineExpose({
   height: 300px;
 }
 
+/* 响应式设计 */
 @media (max-width: 768px) {
+  .dashboard-pane {
+    padding: 10px;
+  }
+  
   .chart-container {
     grid-template-columns: 1fr;
+    gap: 15px;
   }
   
   .filter-container {
     flex-direction: column;
     align-items: flex-start;
+    gap: 15px;
   }
   
-  .filter-group {
-    width: 100%;
+  .chart {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .chart {
+    height: 200px;
+  }
+  
+  .card-header {
     flex-direction: column;
+    gap: 10px;
     align-items: flex-start;
   }
 }

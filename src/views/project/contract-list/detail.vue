@@ -31,45 +31,70 @@
 
     <!-- 标签页内容 -->
       <el-card class="content-card" shadow="hover">
-        <el-tabs v-model="activeTab" class="detail-tabs">
-          <!-- 项目看板 -->
-          <el-tab-pane label="项目看板" name="dashboard">
-            <dashboard-pane 
-              ref="dashboardRef"
-              :bugs-data="bugsData"
-              :tasks-data="tasksData"
-              :project-id="projectId"
-            />
-          </el-tab-pane>
+        <div class="tabs-header-with-filter">
+          <el-tabs v-model="activeTab" class="detail-tabs">
+            <!-- 项目看板 -->
+            <el-tab-pane label="项目看板" name="dashboard">
+              <dashboard-pane 
+                ref="dashboardRef"
+                :bugs-data="filteredBugsData"
+                :tasks-data="filteredTasksData"
+                :project-id="projectId"
+                :selected-module="selectedModule"
+              />
+            </el-tab-pane>
 
-          <!-- 模块列表 -->
-          <el-tab-pane label="模块列表" name="modules">
-            <module-pane 
-              :modules-data="modulesData"
-              :project-id="projectId"
-              @module-success="handleModuleSuccess"
-            />
-          </el-tab-pane>
+            <!-- 模块列表 -->
+            <el-tab-pane label="模块列表" name="modules">
+              <module-pane 
+                :modules-data="filteredModulesData"
+                :project-id="projectId"
+                @module-success="handleModuleSuccess"
+              />
+            </el-tab-pane>
 
-          <!-- 任务列表 -->
-          <el-tab-pane label="任务列表" name="tasks">
-            <task-pane 
-              :tasks-data="tasksData"
-              :modules-data="modulesData"
-              :project-id="projectId"
-              @task-success="handleTaskSuccess"
-            />
-          </el-tab-pane>
+            <!-- 任务列表 -->
+            <el-tab-pane label="任务列表" name="tasks">
+              <task-pane 
+                :tasks-data="filteredTasksData"
+                :modules-data="modulesData"
+                :project-id="projectId"
+                @task-success="handleTaskSuccess"
+              />
+            </el-tab-pane>
 
-          <!-- 缺陷列表 -->
-          <el-tab-pane label="缺陷列表" name="bugs">
-            <bug-pane 
-              :bugs-data="bugsData"
-              :modules-data="modulesData"
-              :project-id="projectId"
+            <!-- 缺陷列表 -->
+            <el-tab-pane label="缺陷列表" name="bugs">
+              <bug-pane 
+                :bugs-data="filteredBugsData"
+                :modules-data="modulesData"
+                :project-id="projectId"
+              />
+            </el-tab-pane>
+          </el-tabs>
+          
+          <div class="filter-container-tabs" v-if="modulesData.length > 0">
+            <el-cascader
+              v-model="selectedModule"
+              :options="moduleOptions"
+              :props="cascaderProps"
+              placeholder="选择模块"
+              clearable
+              size="small"
+              style="width: 180px; margin-right: 10px;"
+              @change="handleModuleChange"
             />
-          </el-tab-pane>
-        </el-tabs>
+            <el-button 
+              type="text" 
+              size="small" 
+              @click="clearModuleFilter"
+              v-if="selectedModule"
+              style="color: #909399;"
+            >
+              清除
+            </el-button>
+          </div>
+        </div>
       </el-card>
   </div>
 
@@ -112,6 +137,124 @@ const router = useRouter()
 // 项目ID
 const projectId = computed(() => route.params.id)
 
+// 模块选项（用于级联选择器）
+const moduleOptions = computed(() => {
+  return modulesData.value
+})
+
+// 获取模块名称
+const getModuleNameById = (moduleId, modules = modulesData.value) => {
+  for (const module of modules) {
+    if (module.id === moduleId) {
+      return module.moduleName
+    }
+    if (module.children && module.children.length) {
+      const childName = getModuleNameById(moduleId, module.children)
+      if (childName) return childName
+    }
+  }
+  return null
+}
+
+// 获取模块及其所有子模块的ID
+const getModuleAndChildrenIds = (moduleId, modules = modulesData.value) => {
+  const ids = []
+  
+  const findModule = (modules) => {
+    for (const module of modules) {
+      if (module.id === moduleId) {
+        ids.push(module.id)
+        // 添加所有子模块ID
+        const addChildrenIds = (children) => {
+          if (children && children.length) {
+            for (const child of children) {
+              ids.push(child.id)
+              addChildrenIds(child.children)
+            }
+          }
+        }
+        addChildrenIds(module.children)
+        return true
+      }
+      if (module.children && module.children.length) {
+        if (findModule(module.children)) return true
+      }
+    }
+    return false
+  }
+  
+  findModule(modules)
+  return ids
+}
+
+// 筛选后的模块数据
+const filteredModulesData = computed(() => {
+  if (!selectedModule.value || selectedModule.value.length === 0) {
+    return modulesData.value
+  }
+  
+  const selectedModuleId = selectedModule.value[selectedModule.value.length - 1]
+  
+  const filterModules = (modules) => {
+    return modules.filter(module => {
+      const moduleAndChildrenIds = getModuleAndChildrenIds(module.id)
+      return moduleAndChildrenIds.includes(selectedModuleId)
+    })
+  }
+  
+  return filterModules(modulesData.value)
+})
+
+// 筛选后的任务数据
+const filteredTasksData = computed(() => {
+  if (!selectedModule.value || selectedModule.value.length === 0) {
+    return tasksData.value
+  }
+  
+  const selectedModuleId = selectedModule.value[selectedModule.value.length - 1]
+  const selectedModuleName = getModuleNameById(selectedModuleId)
+  const moduleAndChildrenIds = getModuleAndChildrenIds(selectedModuleId)
+  const moduleNames = moduleAndChildrenIds.map(id => getModuleNameById(id)).filter(name => name)
+  
+  if (!selectedModuleName || moduleNames.length === 0) {
+    return tasksData.value
+  }
+  
+  const filterTasks = (tasks) => {
+    return tasks.filter(task => {
+      if (moduleNames.includes(task.moduleName)) {
+        return true
+      }
+      // 递归筛选子任务
+      if (task.children && task.children.length) {
+        task.children = filterTasks(task.children)
+        return task.children.length > 0
+      }
+      return false
+    })
+  }
+  
+  return filterTasks([...tasksData.value])
+})
+
+// 筛选后的缺陷数据
+const filteredBugsData = computed(() => {
+  if (!selectedModule.value || selectedModule.value.length === 0) {
+    return bugsData.value
+  }
+  
+  const selectedModuleId = selectedModule.value[selectedModule.value.length - 1]
+  const selectedModuleName = getModuleNameById(selectedModuleId)
+  const moduleAndChildrenIds = getModuleAndChildrenIds(selectedModuleId)
+  const moduleNames = moduleAndChildrenIds.map(id => getModuleNameById(id)).filter(name => name)
+  
+  if (!selectedModuleName || moduleNames.length === 0) {
+    return bugsData.value
+  }
+  
+  return bugsData.value.filter(bug => moduleNames.includes(bug.moduleName))
+})
+
 // 页面标题
 const pageTitle = computed(() => {
   return projectInfo.value?.name || '合同项目详情'
@@ -120,6 +263,16 @@ const pageTitle = computed(() => {
 // 标签页控制
 const activeTab = ref('modules')
 const dashboardRef = ref()
+
+// 模块筛选
+const selectedModule = ref(null)
+const cascaderProps = {
+  checkStrictly: true,
+  value: 'id',
+  label: 'moduleName',
+  children: 'children',
+  expandTrigger: 'hover'
+}
 
 // 监听标签页切换
 watch(activeTab, (newTab) => {
@@ -530,6 +683,17 @@ const handleBack = () => {
   router.push('/project/contract-list')
 }
 
+// 模块筛选处理
+const handleModuleChange = (value) => {
+  selectedModule.value = value
+  console.log('模块筛选变更:', value)
+}
+
+// 清除模块筛选
+const clearModuleFilter = () => {
+  selectedModule.value = null
+}
+
 
 
 // 模块编辑成功回调
@@ -649,5 +813,62 @@ onMounted(() => {
 :deep(.el-tabs__nav-wrap::after) {
   height: 1px;
   background-color: #ebeef5;
+}
+
+.filter-container-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+}
+
+.detail-tabs {
+  position: relative;
+}
+
+.detail-tabs-inner {
+  flex: 1;
+}
+
+:deep(.el-tabs__header) {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 20px;
+}
+
+:deep(.el-tabs__nav-wrap) {
+  flex: 1;
+}
+
+:deep(.el-cascader) {
+  font-size: 12px;
+}
+
+:deep(.el-button--text) {
+  padding: 0;
+  font-size: 12px;
+}
+
+.tabs-header-with-filter {
+  position: relative;
+}
+
+.filter-container-tabs {
+  position: absolute;
+  top: 8px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 10;
+}
+
+.content-card {
+  min-height: 600px;
+}
+
+:deep(.el-tabs__header) {
+  padding-right: 220px;
 }
 </style>

@@ -13,6 +13,12 @@ const routes = [
         component: () => import('@/views/Dashboard.vue')
       },
       {
+        path: '/dashboard/sjs',
+        name: 'SjsDashboard',
+        meta: { title: '设计所指标', icon: 'DataAnalysis' },
+        component: () => import('@/views/dashboard/sjs.vue')
+      },
+      {
         path: '/system',
         name: 'System',
         meta: { title: '系统管理', icon: 'Setting' },
