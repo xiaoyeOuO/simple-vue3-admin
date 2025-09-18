@@ -60,7 +60,70 @@
       </el-col>
     </el-row>
 
+    <!-- 项目类型统计卡片 -->
+    <el-row :gutter="20" class="project-type-cards">
+      <el-col :span="6">
+        <el-card class="project-card" @click="openProjectList('development', '开发项目')">
+          <div class="card-content">
+            <el-icon size="48" color="#409eff">
+              <Tools />
+            </el-icon>
+            <div>
+              <div class="card-number">{{ projectTypes.development }}</div>
+              <div class="card-title">开发项目</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card class="project-card" @click="openProjectList('maintenance', '维护项目')">
+          <div class="card-content">
+            <el-icon size="48" color="#67c23a">
+              <Monitor />
+            </el-icon>
+            <div>
+              <div class="card-number">{{ projectTypes.maintenance }}</div>
+              <div class="card-title">维护项目</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card class="project-card" @click="openProjectList('research', '研究项目')">
+          <div class="card-content">
+            <el-icon size="48" color="#e6a23c">
+              <DocumentCopy />
+            </el-icon>
+            <div>
+              <div class="card-number">{{ projectTypes.research }}</div>
+              <div class="card-title">研究项目</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+      <el-col :span="6">
+        <el-card class="project-card" @click="openProjectList('testing', '测试项目')">
+          <div class="card-content">
+            <el-icon size="48" color="#f56c6c">
+              <Setting />
+            </el-icon>
+            <div>
+              <div class="card-number">{{ projectTypes.testing }}</div>
+              <div class="card-title">测试项目</div>
+            </div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
 
+    <!-- 项目列表弹窗 -->
+    <ProjectListDialog
+      v-model="projectListDialogVisible"
+      :project-type="currentProjectType"
+      :project-type-name="currentProjectTypeName"
+      @view-project="handleViewProject"
+      @edit-project="handleEditProject"
+    />
 
     <!-- 重新布局：左侧两行，右侧迟到人员 -->
     <div class="dashboard-layout">
@@ -471,11 +534,25 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
+import ProjectListDialog from '@/components/ProjectListDialog.vue'
 import moment from 'moment'
 import * as echarts from 'echarts'
-import { User, Document, Star, View, Refresh, Sunrise, Moon } from '@element-plus/icons-vue'
+import { User, Document, Star, View, Refresh, Sunrise, Moon, Tools, Monitor, DocumentCopy, Setting } from '@element-plus/icons-vue'
 
 const loading = ref(false)
+
+// 项目类型统计数据
+const projectTypes = ref({
+  development: 156,
+  maintenance: 89,
+  research: 34,
+  testing: 67
+})
+
+// 项目列表弹窗状态
+const projectListDialogVisible = ref(false)
+const currentProjectType = ref('')
+const currentProjectTypeName = ref('')
 
 // 四个表格数据
 const codeEquivalentData = ref([])
@@ -660,6 +737,25 @@ const fetchQAResolvedData = async () => {
     { name: '孙七', employeeId: 'EMP005', department: '客服部', resolvedCount: 10, avgResponseTime: '6分钟', satisfaction: 4.6 }
   ]
   qaResolvedData.value = await mockApiCall(data)
+}
+
+// 打开项目列表弹窗
+const openProjectList = (type, typeName) => {
+  currentProjectType.value = type
+  currentProjectTypeName.value = typeName
+  projectListDialogVisible.value = true
+}
+
+// 处理查看项目事件
+const handleViewProject = (project) => {
+  console.log('查看项目:', project)
+  // 这里可以添加查看项目的逻辑，比如跳转到项目详情页
+}
+
+// 处理编辑项目事件
+const handleEditProject = (project) => {
+  console.log('编辑项目:', project)
+  // 这里可以添加编辑项目的逻辑，比如打开编辑弹窗
 }
 
 
@@ -1262,6 +1358,20 @@ onUnmounted(() => {
 
 .stat-cards {
   margin-bottom: 20px;
+}
+
+.project-type-cards {
+  margin-bottom: 20px;
+}
+
+.project-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .tables-filter {

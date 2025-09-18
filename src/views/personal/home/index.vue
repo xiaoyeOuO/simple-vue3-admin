@@ -113,7 +113,7 @@
         <el-col :span="12">
           <div class="chart-card">
             <div class="chart-header">
-              <h3>遗留缺陷比例及趋势</h3>
+              <h3>缺陷趋势分析</h3>
             </div>
             <div ref="legacyDefectChart" class="chart-container" style="height: 300px"></div>
           </div>
@@ -698,14 +698,17 @@ const initLegacyDefectChart = () => {
   
   const option = {
     title: {
-      text: '遗留缺陷趋势',
+      text: '缺陷趋势分析',
       left: 'center'
     },
     tooltip: {
-      trigger: 'axis'
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross'
+      }
     },
     legend: {
-      data: ['未解决缺陷', '总缺陷数'],
+      data: ['当天新增缺陷', '当天解决缺陷', '遗留缺陷'],
       top: 30
     },
     xAxis: {
@@ -718,18 +721,31 @@ const initLegacyDefectChart = () => {
     },
     series: [
       {
-        name: '未解决缺陷',
+        name: '当天新增缺陷',
+        type: 'line',
+        data: [8, 12, 10, 15, 11, 9],
+        smooth: true,
+        itemStyle: { color: '#F56C6C' },
+        lineStyle: { width: 3 }
+      },
+      {
+        name: '当天解决缺陷',
+        type: 'line',
+        data: [5, 8, 12, 10, 13, 11],
+        smooth: true,
+        itemStyle: { color: '#67C23A' },
+        lineStyle: { width: 3 }
+      },
+      {
+        name: '遗留缺陷',
         type: 'line',
         data: [5, 8, 6, 9, 7, 5],
         smooth: true,
-        itemStyle: { color: '#F56C6C' }
-      },
-      {
-        name: '总缺陷数',
-        type: 'line',
-        data: [10, 15, 12, 18, 14, 10],
-        smooth: true,
-        itemStyle: { color: '#409EFF' }
+        itemStyle: { color: '#409EFF' },
+        lineStyle: { width: 3 },
+        areaStyle: {
+          opacity: 0.2
+        }
       }
     ]
   }
@@ -746,19 +762,22 @@ const initLegacyDefectChartWithData = (data) => {
   
   const option = {
     title: {
-      text: '遗留缺陷趋势',
+      text: '缺陷趋势分析',
       left: 'center'
     },
     tooltip: {
-      trigger: 'axis'
+      trigger: 'axis',
+      axisPointer: {
+        type: 'cross'
+      }
     },
     legend: {
-      data: ['未解决缺陷', '总缺陷数'],
+      data: ['当天新增缺陷', '当天解决缺陷', '遗留缺陷'],
       top: 30
     },
     xAxis: {
       type: 'category',
-      data: data.weeks
+      data: data.weeks || data.dates || ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周']
     },
     yAxis: {
       type: 'value',
@@ -766,18 +785,31 @@ const initLegacyDefectChartWithData = (data) => {
     },
     series: [
       {
-        name: '未解决缺陷',
+        name: '当天新增缺陷',
         type: 'line',
-        data: data.unresolved,
+        data: data.newlyAdded || data.added || [8, 12, 10, 15, 11, 9],
         smooth: true,
-        itemStyle: { color: '#F56C6C' }
+        itemStyle: { color: '#F56C6C' },
+        lineStyle: { width: 3 }
       },
       {
-        name: '总缺陷数',
+        name: '当天解决缺陷',
         type: 'line',
-        data: data.total,
+        data: data.resolved || data.fixed || [5, 8, 12, 10, 13, 11],
         smooth: true,
-        itemStyle: { color: '#409EFF' }
+        itemStyle: { color: '#67C23A' },
+        lineStyle: { width: 3 }
+      },
+      {
+        name: '遗留缺陷',
+        type: 'line',
+        data: data.legacy || data.remaining || data.unresolved || [5, 8, 6, 9, 7, 5],
+        smooth: true,
+        itemStyle: { color: '#409EFF' },
+        lineStyle: { width: 3 },
+        areaStyle: {
+          opacity: 0.2
+        }
       }
     ]
   }

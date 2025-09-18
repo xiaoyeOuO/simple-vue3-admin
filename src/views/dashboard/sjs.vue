@@ -70,6 +70,332 @@
         </div>
       </div>
     </div>
+
+    <!-- 数据表格区域 -->
+    <div class="tables-container">
+      <!-- 第一行：迟到人员和迟到次数统计 -->
+      <div class="table-row">
+        <div class="table-item">
+          <el-card class="dashboard-card">
+            <template #header>
+              <div class="card-header">
+                <span>迟到人员</span>
+                <div class="table-date-filter">
+                  <el-date-picker
+                    v-model="tableDateRanges.lateEmployees"
+                    type="date"
+                    placeholder="选择日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    size="small"
+                    style="width: 140px; margin-right: 8px;"
+                    @change="refreshTable('lateEmployees')"
+                  />
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    @click="refreshTable('lateEmployees')"
+                    :loading="loading"
+                  >
+                    <el-icon><Refresh /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+            </template>
+            <div class="late-section">
+              <div class="late-header">
+                <el-icon><Sunrise /></el-icon>
+                <span>上午迟到 ({{ morningLate.length }}人)</span>
+              </div>
+              <el-table :data="morningLate" style="width: 100%" height="180">
+                <el-table-column prop="name" label="姓名" width="100" />
+                <el-table-column prop="employeeId" label="工号" width="100" />
+                <el-table-column prop="lateTime" label="迟到时间" />
+              </el-table>
+            </div>
+            <el-divider />
+            <div class="late-section">
+              <div class="late-header">
+                <el-icon><Moon /></el-icon>
+                <span>下午迟到 ({{ afternoonLate.length }}人)</span>
+              </div>
+              <el-table :data="afternoonLate" style="width: 100%" height="180">
+                <el-table-column prop="name" label="姓名" width="100" />
+                <el-table-column prop="employeeId" label="工号" width="100" />
+                <el-table-column prop="lateTime" label="迟到时间" />
+              </el-table>
+            </div>
+          </el-card>
+        </div>
+
+        <div class="table-item">
+          <el-card class="dashboard-card">
+            <template #header>
+              <div class="card-header">
+                <span>迟到次数统计</span>
+                <div class="table-date-filter">
+                  <el-date-picker
+                    v-model="tableDateRanges.lateCount"
+                    type="daterange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    size="small"
+                    style="width: 200px; margin-right: 8px;"
+                    @change="refreshTable('lateCount')"
+                  />
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    @click="refreshTable('lateCount')"
+                    :loading="loading"
+                  >
+                    <el-icon><Refresh /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+            </template>
+            <el-table :data="lateCountData" style="width: 100%" height="400">
+              <el-table-column prop="name" label="姓名" width="100" />
+              <el-table-column prop="employeeId" label="工号" width="100" />
+              <el-table-column prop="lateCount" label="迟到次数" align="center">
+                <template #default="{ row }">
+                  <el-tag :type="row.lateCount > 5 ? 'danger' : row.lateCount > 2 ? 'warning' : 'info'">
+                    {{ row.lateCount }}次
+                  </el-tag>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+      </div>
+
+      <!-- 第二行：个人代码当量前五名和无代码当量人员 -->
+      <div class="table-row">
+        <div class="table-item">
+          <el-card class="dashboard-card">
+            <template #header>
+              <div class="card-header">
+                <span>个人代码当量前五名</span>
+                <div class="table-date-filter">
+                  <el-date-picker
+                    v-model="tableDateRanges.top5Personal"
+                    type="daterange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    size="small"
+                    style="width: 200px; margin-right: 8px;"
+                    @change="refreshTable('top5Personal')"
+                  />
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    @click="refreshTable('top5Personal')"
+                    :loading="loading"
+                  >
+                    <el-icon><Refresh /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+            </template>
+            <el-table :data="top5PersonalData" style="width: 100%" height="400">
+              <el-table-column prop="rank" label="排名" width="60" align="center">
+                <template #default="{ row }">
+                  <el-tag :type="row.rank === 1 ? 'danger' : row.rank === 2 ? 'warning' : row.rank === 3 ? 'success' : 'info'">
+                    {{ row.rank }}
+                  </el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column prop="name" label="姓名" width="100" />
+              <el-table-column prop="employeeId" label="工号" width="100" />
+              <el-table-column prop="total" label="代码当量" align="center">
+                <template #default="{ row }">
+                  <span class="number-text">{{ row.total.toLocaleString() }}</span>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+
+        <div class="table-item">
+          <el-card class="dashboard-card">
+            <template #header>
+              <div class="card-header">
+                <span>无代码当量人员</span>
+                <div class="table-date-filter">
+                  <el-date-picker
+                    v-model="tableDateRanges.noCodeEquivalent"
+                    type="daterange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    size="small"
+                    style="width: 200px; margin-right: 8px;"
+                    @change="refreshTable('noCodeEquivalent')"
+                  />
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    @click="refreshTable('noCodeEquivalent')"
+                    :loading="loading"
+                  >
+                    <el-icon><Refresh /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+            </template>
+            <el-table :data="noCodeEquivalentData" style="width: 100%" height="400">
+              <el-table-column prop="name" label="姓名" width="100" />
+              <el-table-column prop="employeeId" label="工号" width="100" />
+              <el-table-column prop="department" label="部门" width="120" />
+              <el-table-column prop="days" label="无当量天数" align="center">
+                <template #default="{ row }">
+                  <el-tag type="warning">{{ row.days }}天</el-tag>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+      </div>
+
+      <!-- 第三行：代码当量日均不足100人员、月工时不足7.5人员、加班工时未达标人员 -->
+      <div class="table-row">
+        <div class="table-item">
+          <el-card class="dashboard-card">
+            <template #header>
+              <div class="card-header">
+                <span>代码当量日均不足100人员</span>
+                <div class="table-date-filter">
+                  <el-date-picker
+                    v-model="tableDateRanges.lowCodeEquivalent"
+                    type="daterange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    size="small"
+                    style="width: 200px; margin-right: 8px;"
+                    @change="refreshTable('lowCodeEquivalent')"
+                  />
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    @click="refreshTable('lowCodeEquivalent')"
+                    :loading="loading"
+                  >
+                    <el-icon><Refresh /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+            </template>
+            <el-table :data="lowCodeEquivalentData" style="width: 100%" height="400">
+              <el-table-column prop="name" label="姓名" width="100" />
+              <el-table-column prop="employeeId" label="工号" width="100" />
+              <el-table-column prop="department" label="部门" width="120" />
+              <el-table-column prop="avgDailyEquivalent" label="日均当量" align="center">
+                <template #default="{ row }">
+                  <el-tag type="danger">{{ row.avgDailyEquivalent }}</el-tag>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+
+        <div class="table-item">
+          <el-card class="dashboard-card">
+            <template #header>
+              <div class="card-header">
+                <span>月工时不足7.5人员</span>
+                <div class="table-date-filter">
+                  <el-date-picker
+                    v-model="tableDateRanges.lowMonthlyHours"
+                    type="daterange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    size="small"
+                    style="width: 200px; margin-right: 8px;"
+                    @change="refreshTable('lowMonthlyHours')"
+                  />
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    @click="refreshTable('lowMonthlyHours')"
+                    :loading="loading"
+                  >
+                    <el-icon><Refresh /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+            </template>
+            <el-table :data="lowMonthlyHoursData" style="width: 100%" height="400">
+              <el-table-column prop="name" label="姓名" width="100" />
+              <el-table-column prop="employeeId" label="工号" width="100" />
+              <el-table-column prop="department" label="部门" width="120" />
+              <el-table-column prop="avgDailyHours" label="日均工时" align="center">
+                <template #default="{ row }">
+                  <el-tag type="warning">{{ row.avgDailyHours }}小时</el-tag>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+
+        <div class="table-item">
+          <el-card class="dashboard-card">
+            <template #header>
+              <div class="card-header">
+                <span>加班工时未达标人员</span>
+                <div class="table-date-filter">
+                  <el-date-picker
+                    v-model="tableDateRanges.overtimeNotMet"
+                    type="daterange"
+                    range-separator="至"
+                    start-placeholder="开始日期"
+                    end-placeholder="结束日期"
+                    format="YYYY-MM-DD"
+                    value-format="YYYY-MM-DD"
+                    size="small"
+                    style="width: 200px; margin-right: 8px;"
+                    @change="refreshTable('overtimeNotMet')"
+                  />
+                  <el-button 
+                    type="primary" 
+                    size="small" 
+                    @click="refreshTable('overtimeNotMet')"
+                    :loading="loading"
+                  >
+                    <el-icon><Refresh /></el-icon>
+                  </el-button>
+                </div>
+              </div>
+            </template>
+            <el-table :data="overtimeNotMetData" style="width: 100%" height="400">
+              <el-table-column prop="name" label="姓名" width="100" />
+              <el-table-column prop="employeeId" label="工号" width="100" />
+              <el-table-column prop="department" label="部门" width="120" />
+              <el-table-column prop="requiredOvertime" label="要求加班工时" align="center" />
+              <el-table-column prop="actualOvertime" label="实际加班工时" align="center" />
+              <el-table-column prop="shortfall" label="缺口" align="center">
+                <template #default="{ row }">
+                  <el-tag type="danger">{{ row.shortfall }}小时</el-tag>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-card>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -77,7 +403,7 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import * as echarts from 'echarts'
 import { ElMessage } from 'element-plus'
-import { Refresh } from '@element-plus/icons-vue'
+import { Refresh, Sunrise, Moon } from '@element-plus/icons-vue'
 import moment from 'moment'
 
 // 日期范围
@@ -85,6 +411,30 @@ const dateRange = ref([
   new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // 30天前
   new Date() // 今天
 ])
+
+// 加载状态
+const loading = ref(false)
+
+// 表格数据
+const morningLate = ref([])
+const afternoonLate = ref([])
+const lateCountData = ref([])
+const top5PersonalData = ref([])
+const noCodeEquivalentData = ref([])
+const lowCodeEquivalentData = ref([])
+const lowMonthlyHoursData = ref([])
+const overtimeNotMetData = ref([])
+
+// 表格日期范围
+const tableDateRanges = ref({
+  lateEmployees: new Date(Date.now() - 24 * 60 * 60 * 1000), // 昨天
+  lateCount: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+  top5Personal: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+  noCodeEquivalent: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+  lowCodeEquivalent: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()],
+  lowMonthlyHours: [new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), new Date()],
+  overtimeNotMet: [new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), new Date()]
+})
 
 // 图表实例
 let problemChartInstance = null
@@ -101,10 +451,90 @@ const onTimeChart = ref(null)
 const overdueChart = ref(null)
 
 // 模拟API调用
-const mockApiCall = (data) => {
+const mockApiCall = (data, delay = 500) => {
   return new Promise(resolve => {
-    setTimeout(() => resolve(data), 300)
+    setTimeout(() => resolve(data), delay)
   })
+}
+
+// 获取迟到人员数据
+const fetchLateEmployees = async (date) => {
+  const mockData = {
+    morning: [
+      { name: '张三', employeeId: 'S001', department: '设计部', lateTime: '09:15' },
+      { name: '李四', employeeId: 'S002', department: '前端组', lateTime: '09:23' },
+      { name: '王五', employeeId: 'S003', department: '后端组', lateTime: '09:45' }
+    ],
+    afternoon: [
+      { name: '赵六', employeeId: 'S004', department: '测试组', lateTime: '14:10' },
+      { name: '钱七', employeeId: 'S005', department: '产品部', lateTime: '14:25' }
+    ]
+  }
+  return await mockApiCall(mockData)
+}
+
+// 获取迟到次数统计
+const fetchLateCount = async (startDate, endDate) => {
+  const mockData = [
+    { name: '张三', employeeId: 'S001', department: '设计部', lateCount: 3, avgLateTime: '15分钟' },
+    { name: '李四', employeeId: 'S002', department: '前端组', lateCount: 2, avgLateTime: '23分钟' },
+    { name: '王五', employeeId: 'S003', department: '后端组', lateCount: 4, avgLateTime: '45分钟' },
+    { name: '赵六', employeeId: 'S004', department: '测试组', lateCount: 1, avgLateTime: '10分钟' },
+    { name: '钱七', employeeId: 'S005', department: '产品部', lateCount: 2, avgLateTime: '25分钟' }
+  ]
+  return await mockApiCall(mockData)
+}
+
+// 获取个人代码当量前五名
+const fetchTop5Personal = async (startDate, endDate) => {
+  const mockData = [
+    { name: '张三', employeeId: 'S001', department: '设计部', equivalent: 1250, rank: 1, trend: 'up' },
+    { name: '李四', employeeId: 'S002', department: '前端组', equivalent: 1180, rank: 2, trend: 'up' },
+    { name: '王五', employeeId: 'S003', department: '后端组', equivalent: 1050, rank: 3, trend: 'down' },
+    { name: '赵六', employeeId: 'S004', department: '测试组', equivalent: 980, rank: 4, trend: 'up' },
+    { name: '钱七', employeeId: 'S005', department: '产品部', equivalent: 920, rank: 5, trend: 'same' }
+  ]
+  return await mockApiCall(mockData)
+}
+
+// 获取无代码当量人员
+const fetchNoCodeEquivalent = async (startDate, endDate) => {
+  const mockData = [
+    { name: '孙八', employeeId: 'S006', department: '设计部', daysWithoutCode: 5, status: 'warning' },
+    { name: '周九', employeeId: 'S007', department: '产品部', daysWithoutCode: 3, status: 'warning' },
+    { name: '吴十', employeeId: 'S008', department: '测试组', daysWithoutCode: 7, status: 'danger' }
+  ]
+  return await mockApiCall(mockData)
+}
+
+// 获取代码当量日均不足100人员
+const fetchLowCodeEquivalent = async (startDate, endDate) => {
+  const mockData = [
+    { name: '郑一', employeeId: 'S009', department: '前端组', avgEquivalent: 85, days: 5, status: 'warning' },
+    { name: '王二', employeeId: 'S010', department: '后端组', avgEquivalent: 72, days: 7, status: 'danger' },
+    { name: '李三', employeeId: 'S011', department: '测试组', avgEquivalent: 95, days: 3, status: 'warning' }
+  ]
+  return await mockApiCall(mockData)
+}
+
+// 获取月工时不足7.5人员
+const fetchLowMonthlyHours = async (startDate, endDate) => {
+  const mockData = [
+    { name: '张四', employeeId: 'S012', department: '设计部', avgDailyHours: 6.8, insufficientDays: 8, status: 'danger' },
+    { name: '李五', employeeId: 'S013', department: '前端组', avgDailyHours: 7.2, insufficientDays: 5, status: 'warning' },
+    { name: '王六', employeeId: 'S014', department: '后端组', avgDailyHours: 6.5, insufficientDays: 10, status: 'danger' }
+  ]
+  return await mockApiCall(mockData)
+}
+
+// 获取加班工时未达标人员
+const fetchOvertimeNotMet = async (startDate, endDate) => {
+  const mockData = [
+    { name: '赵七', employeeId: 'S015', department: '测试组', requiredOvertime: 10, actualOvertime: 6, completionRate: '60%', status: 'danger' },
+    { name: '钱八', employeeId: 'S016', department: '产品部', requiredOvertime: 8, actualOvertime: 5, completionRate: '62.5%', status: 'warning' },
+    { name: '孙九', employeeId: 'S017', department: '设计部', requiredOvertime: 12, actualOvertime: 4, completionRate: '33.3%', status: 'danger' }
+  ]
+  return await mockApiCall(mockData)
 }
 
 // 获取未解决问题数据
@@ -197,6 +627,52 @@ const fetchOverdueData = async () => {
   const overdue = 17
   const total = 85
   return await mockApiCall({ overdue, total, rate: (overdue / total * 100).toFixed(1) })
+}
+
+// 格式化日期范围
+const formatTableDateRange = (date) => {
+  if (Array.isArray(date)) {
+    return `${moment(date[0]).format('YYYY-MM-DD')} 至 ${moment(date[1]).format('YYYY-MM-DD')}`
+  } else {
+    return moment(date).format('YYYY-MM-DD')
+  }
+}
+
+// 表格刷新函数
+const refreshTable = async (tableType) => {
+  loading.value = true
+  try {
+    switch (tableType) {
+      case 'lateEmployees':
+        const lateData = await fetchLateEmployees(tableDateRanges.value.lateEmployees)
+        morningLate.value = lateData.morning
+        afternoonLate.value = lateData.afternoon
+        break
+      case 'lateCount':
+        lateCountData.value = await fetchLateCount(tableDateRanges.value.lateCount[0], tableDateRanges.value.lateCount[1])
+        break
+      case 'top5Personal':
+        top5PersonalData.value = await fetchTop5Personal(tableDateRanges.value.top5Personal[0], tableDateRanges.value.top5Personal[1])
+        break
+      case 'noCodeEquivalent':
+        noCodeEquivalentData.value = await fetchNoCodeEquivalent(tableDateRanges.value.noCodeEquivalent[0], tableDateRanges.value.noCodeEquivalent[1])
+        break
+      case 'lowCodeEquivalent':
+        lowCodeEquivalentData.value = await fetchLowCodeEquivalent(tableDateRanges.value.lowCodeEquivalent[0], tableDateRanges.value.lowCodeEquivalent[1])
+        break
+      case 'lowMonthlyHours':
+        lowMonthlyHoursData.value = await fetchLowMonthlyHours(tableDateRanges.value.lowMonthlyHours[0], tableDateRanges.value.lowMonthlyHours[1])
+        break
+      case 'overtimeNotMet':
+        overtimeNotMetData.value = await fetchOvertimeNotMet(tableDateRanges.value.overtimeNotMet[0], tableDateRanges.value.overtimeNotMet[1])
+        break
+    }
+    ElMessage.success('数据已刷新')
+  } catch (error) {
+    ElMessage.error('数据刷新失败')
+  } finally {
+    loading.value = false
+  }
 }
 
 // 初始化未解决问题图表
@@ -508,12 +984,15 @@ const handleDateChange = () => {
 
 // 刷新数据
 const refreshData = async () => {
+  loading.value = true
   try {
     await initAllCharts()
     ElMessage.success('数据已刷新')
   } catch (error) {
     ElMessage.error('数据刷新失败')
     console.error('数据刷新错误:', error)
+  } finally {
+    loading.value = false
   }
 }
 
@@ -554,10 +1033,19 @@ const cleanupCharts = () => {
 
 // 生命周期
 onMounted(async () => {
-  await initAllCharts()
+  initAllCharts()
+  // 初始化表格数据
+  await Promise.all([
+    refreshTable('lateEmployees'),
+    refreshTable('lateCount'),
+    refreshTable('top5Personal'),
+    refreshTable('noCodeEquivalent'),
+    refreshTable('lowCodeEquivalent'),
+    refreshTable('lowMonthlyHours'),
+    refreshTable('overtimeNotMet')
+  ])
   window.addEventListener('resize', handleResize)
 })
-
 onUnmounted(() => {
   cleanupCharts()
 })
@@ -655,5 +1143,112 @@ onUnmounted(() => {
     gap: 16px;
     text-align: center;
   }
+}
+
+/* 表格区域样式 */
+.table-section {
+  margin-top: 20px;
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 0 10px;
+}
+
+.table-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.table-date-filter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.table-date-filter .el-date-editor {
+  width: 240px;
+}
+
+.table-date-filter .el-button {
+  padding: 8px 12px;
+}
+
+/* 迟到人员表格样式 */
+.late-section {
+  background: #f5f7fa;
+  border-radius: 4px;
+  padding: 15px;
+  margin-bottom: 20px;
+}
+
+.late-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+  font-weight: 600;
+  color: #606266;
+}
+
+.late-header .el-icon {
+  margin-right: 8px;
+  font-size: 16px;
+}
+
+.late-header.morning {
+  color: #e6a23c;
+}
+
+.late-header.afternoon {
+  color: #409eff;
+}
+
+/* 状态标签样式 */
+.status-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-tag.warning {
+  background-color: #fdf6ec;
+  color: #e6a23c;
+  border: 1px solid #f5dab1;
+}
+
+.status-tag.danger {
+  background-color: #fef0f0;
+  color: #f56c6c;
+  border: 1px solid #fbc4c4;
+}
+
+.status-tag.success {
+  background-color: #f0f9ff;
+  color: #409eff;
+  border: 1px solid #b3d8ff;
+}
+
+/* 趋势图标样式 */
+.trend-icon {
+  margin-left: 4px;
+  font-size: 14px;
+}
+
+.trend-icon.up {
+  color: #67c23a;
+}
+
+.trend-icon.down {
+  color: #f56c6c;
+}
+
+.trend-icon.same {
+  color: #909399;
 }
 </style>

@@ -23,6 +23,37 @@
           </el-button>
         </el-button-group>
       </div>
+      <!-- 搜索条件区域 -->
+      <div style="display: flex; gap: 10px; align-items: center; margin-left: 10px;">
+        <!-- 模块名称搜索 -->
+        <el-input
+          v-model="searchConditions.keyword"
+          placeholder="搜索模块名称"
+          clearable
+          @input="handleSearch"
+          @clear="handleSearch"
+          style="width: 200px;"
+        >
+          <template #prefix>
+            <el-icon><Search /></el-icon>
+          </template>
+        </el-input>
+        
+        <!-- 状态筛选 -->
+        <el-select
+          v-model="searchConditions.status"
+          placeholder="选择状态"
+          clearable
+          @change="handleSearch"
+          style="width: 120px;"
+        >
+          <el-option label="全部状态" value="" />
+          <el-option label="进行中" value="inProgress" />
+          <el-option label="已完成" value="completed" />
+          <el-option label="已暂停" value="paused" />
+        </el-select>
+      </div>
+      
       <el-dropdown @command="handleColumnCommand" v-if="viewMode === 'table'">
         <el-button type="default">
           <el-icon><Setting /></el-icon>
@@ -48,7 +79,7 @@
     <div v-if="viewMode === 'table'" class="table-view">
       <vxe-table
         ref="xTable"
-        :data="modulesData"
+        :data="filteredModulesData"
         border
         row-key
         :tree-config="{ children: 'children', expandAll: true }"
@@ -156,15 +187,15 @@
         <!-- 左侧表格 -->
         <div class="gantt-left">
           <vxe-table
-            ref="ganttTable"
-            :data="flattenModulesData"
-            border
-            row-key="id"
-            :column-config="{ resizable: true }"
-            height="500"
-            :row-class-name="getRowClassName"
-            @cell-click="handleTableCellClick"
-          >
+          ref="ganttTable"
+          :data="filteredFlattenModulesData"
+          border
+          row-key="id"
+          :column-config="{ resizable: true }"
+          height="500"
+          :row-class-name="getRowClassName"
+          @cell-click="handleTableCellClick"
+        >
             <vxe-column field="moduleName" title="模块名称" min-width="200">
               <template #default="{ row }">
                 <div class="module-name-cell" :style="{ paddingLeft: (row.level * 20) + 'px' }">
@@ -420,7 +451,7 @@
 
 <script setup>
 import { ref, computed, defineEmits, onMounted, watch } from 'vue'
-import { Plus, Edit, Delete, Folder, Document, Grid, Calendar, Setting, ArrowDown, ArrowRight } from '@element-plus/icons-vue'
+import { Plus, Edit, Delete, Folder, Document, Grid, Calendar, Setting, ArrowDown, ArrowRight, Search } from '@element-plus/icons-vue'
 import moment from 'moment'
 
 // Props
@@ -449,6 +480,13 @@ const columnsVisible = ref({
 
 const viewMode = ref('table')
 const selectedRowId = ref(null)
+
+// 搜索条件对象
+const searchConditions = ref({
+  keyword: '', // 模块名称关键词
+  status: '', // 模块状态
+  // 可以在这里添加更多搜索条件
+})
 
 // 树形结构展开状态管理
 const expandedKeys = ref(new Set())
@@ -534,6 +572,68 @@ const flattenModulesData = computed(() => {
     return result
   }
   return flatten(props.modulesData)
+})
+
+// 计算属性：过滤后的模块数据（根据搜索条件）
+const filteredModulesData = computed(() => {
+  // 如果没有搜索条件，返回原始数据
+  if (!hasActiveSearchConditions.value) {
+    return props.modulesData
+  }
+  
+  const filterByConditions = (items) => {
+    return items.filter(item => {
+      // 检查模块名称关键词匹配
+      const matchesKeyword = !searchConditions.value.keyword || 
+        item.moduleName.toLowerCase().includes(searchConditions.value.keyword.toLowerCase())
+      
+      // 检查状态匹配（如果有状态条件）
+      const matchesStatus = !searchConditions.value.status || 
+        item.status === searchConditions.value.status
+      
+      // 如果当前项不匹配所有条件，检查子项
+      if (!matchesKeyword || !matchesStatus) {
+        if (item.children && item.children.length > 0) {
+          const filteredChildren = filterByConditions(item.children)
+          if (filteredChildren.length > 0) {
+            // 如果子项匹配，返回包含过滤后子项的新对象
+            item.children = filteredChildren
+            return true
+          }
+        }
+        return false
+      }
+      
+      // 当前项匹配，处理子项
+      if (item.children && item.children.length > 0) {
+        const filteredChildren = filterByConditions(item.children)
+        item.children = filteredChildren
+      }
+      
+      return true
+    })
+  }
+  
+  return filterByConditions([...props.modulesData])
+})
+
+// 计算属性：过滤后的展平模块数据（甘特图视图）
+const filteredFlattenModulesData = computed(() => {
+  if (!hasActiveSearchConditions.value) {
+    return flattenModulesData.value
+  }
+  
+  return flattenModulesData.value.filter(item => {
+    // 检查模块名称关键词匹配
+    const matchesKeyword = !searchConditions.value.keyword || 
+      item.moduleName.toLowerCase().includes(searchConditions.value.keyword.toLowerCase())
+    
+    // 检查状态匹配（如果有状态条件）
+    const matchesStatus = !searchConditions.value.status || 
+      item.status === searchConditions.value.status
+    
+    return matchesKeyword && matchesStatus
+  })
 })
 
 // 初始化展开状态（默认展开所有父级节点）
@@ -761,10 +861,50 @@ const handleDelete = (row) => {
 
 const handleColumnCommand = (command) => {
   // 列设置命令处理
+  switch (command) {
+    case 'toggleTaskCount':
+      columnsVisible.value.taskCount = !columnsVisible.value.taskCount
+      break
+    case 'toggleWorkingHours':
+      columnsVisible.value.workingHours = !columnsVisible.value.workingHours
+      break
+    case 'toggleUserCount':
+      columnsVisible.value.userCount = !columnsVisible.value.userCount
+      break
+  }
 }
 
+// 切换视图
 const switchView = (mode) => {
   viewMode.value = mode
+}
+
+// 搜索处理
+const handleSearch = () => {
+  // 搜索时重置展开状态，确保搜索结果可见
+  if (hasActiveSearchConditions.value) {
+    // 展开所有节点以便显示搜索结果
+    expandAllForSearch()
+  }
+}
+
+// 计算属性：检查是否有活跃的搜索条件
+const hasActiveSearchConditions = computed(() => {
+  return searchConditions.value.keyword.trim() !== '' || searchConditions.value.status !== ''
+})
+
+// 为搜索展开所有节点
+const expandAllForSearch = () => {
+  const expandAll = (items) => {
+    items.forEach(item => {
+      const id = item.id || item.softId || Math.random().toString(36).substr(2, 9)
+      expandedKeys.value.add(id)
+      if (item.children && item.children.length > 0) {
+        expandAll(item.children)
+      }
+    })
+  }
+  expandAll(props.modulesData)
 }
 
 const showTaskDetail = (row) => {
