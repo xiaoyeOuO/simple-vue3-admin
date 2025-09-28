@@ -59,6 +59,12 @@ const routes = [
             name: 'PersonnelProfile',
             meta: { title: '人员档案', icon: 'Avatar' },
             component: () => import('@/views/system/personnelProfile/index.vue')
+          },
+          {
+            path: '/system/workTimeWarning',
+            name: 'WorkTimeWarning',
+            meta: { title: '工时预警', icon: 'Warning' },
+            component: () => import('@/views/system/workTimeWarning/index.vue')
           }
         ]
       },

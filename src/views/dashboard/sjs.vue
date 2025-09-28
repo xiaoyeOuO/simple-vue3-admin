@@ -711,12 +711,12 @@ const initProblemChart = async () => {
       containLabel: true
     },
     xAxis: {
-      type: 'category',
-      data: data.map(item => item.productLine)
-    },
-    yAxis: {
       type: 'value',
       name: '问题数量'
+    },
+    yAxis: {
+      type: 'category',
+      data: data.map(item => item.productLine)
     },
     series: [
       {

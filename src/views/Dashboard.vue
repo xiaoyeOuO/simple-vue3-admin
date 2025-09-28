@@ -529,6 +529,28 @@
         <!-- 饼图将通过JavaScript动态生成 -->
       </div>
     </el-card>
+
+    <!-- 迟到人员分布饼图 -->
+    <el-card class="dashboard-card" style="margin-top: 20px; width: 100%;">
+      <template #header>
+        <div class="card-header">
+          <span>迟到人员分布</span>
+          <el-tag type="info">当前统计</el-tag>
+        </div>
+      </template>
+      <div ref="lateDistributionChart" class="chart-container"></div>
+    </el-card>
+
+    <!-- 逾期任务四个所占比饼图 -->
+    <el-card class="dashboard-card" style="margin-top: 20px; width: 100%;">
+      <template #header>
+        <div class="card-header">
+          <span>逾期任务四个所占比</span>
+          <el-tag type="warning">当前统计</el-tag>
+        </div>
+      </template>
+      <div ref="overdueInstituteChart" class="chart-container"></div>
+    </el-card>
   </div>
 </template>
 
@@ -568,6 +590,8 @@ const afternoonLate = ref([])
 const taskHoursChart = ref()
 const onTimeTaskChart = ref()
 const overdueTaskChart = ref()
+const lateDistributionChart = ref()
+const overdueInstituteChart = ref()
 const pieChart1 = ref()
 const pieChart2 = ref()
 const pieChart3 = ref()
@@ -577,6 +601,8 @@ const qaResolvedData = ref([])
 let chartInstance = null
 let onTimeTaskChartInstance = null
 let overdueTaskChartInstance = null
+let lateDistributionChartInstance = null
+let overdueInstituteChartInstance = null
 let pieChartInstances = []
 
 // 模拟API调用
@@ -1001,6 +1027,8 @@ const initPieCharts = async (pieData) => {
         // 初始化新饼图
         await initOnTimeTaskChart(tableDateRanges.value.onTimeTask[0], tableDateRanges.value.onTimeTask[1])
         await initOverdueTaskChart(tableDateRanges.value.overdueTask[0], tableDateRanges.value.overdueTask[1])
+        await initLateDistributionChart()
+        await initOverdueInstituteChart()
       } finally {
         loading.value = false
       }
@@ -1194,6 +1222,168 @@ const initPieCharts = async (pieData) => {
     }
   }
 
+  // 初始化迟到人员分布饼图
+  const initLateDistributionChart = async () => {
+    try {
+      // 模拟API调用获取数据
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // 模拟四个所的迟到人员数据
+      const chartData = [
+        { value: 15, name: '第一研究所' },
+        { value: 8, name: '第二研究所' },
+        { value: 12, name: '第三研究所' },
+        { value: 6, name: '第四研究所' }
+      ]
+      
+      if (!lateDistributionChart.value) {
+        console.error('迟到人员分布图表容器未找到')
+        return
+      }
+      
+      // 清理旧实例
+      if (lateDistributionChartInstance) {
+        lateDistributionChartInstance.dispose()
+      }
+      
+      lateDistributionChartInstance = echarts.init(lateDistributionChart.value)
+      
+      const option = {
+        title: {
+          text: '迟到人员分布统计',
+          left: 'center',
+          top: 20,
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c}人 ({d}%)'
+        },
+        legend: {
+          orient: 'horizontal',
+          left: 'center',
+          top: 60,
+          itemGap: 20
+        },
+        series: [
+          {
+            name: '迟到人员分布',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['50%', '65%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: true,
+              formatter: '{b}: {c}人'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            data: chartData
+          }
+        ],
+        color: ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C']
+      }
+      
+      lateDistributionChartInstance.setOption(option)
+      
+    } catch (error) {
+      console.error('初始化迟到人员分布图表失败:', error)
+    }
+  }
+
+  // 初始化逾期任务四个所占比饼图
+  const initOverdueInstituteChart = async () => {
+    try {
+      // 模拟API调用获取数据
+      await new Promise(resolve => setTimeout(resolve, 300))
+      
+      // 模拟四个所的逾期任务数据
+      const chartData = [
+        { value: 25, name: '第一研究所' },
+        { value: 18, name: '第二研究所' },
+        { value: 32, name: '第三研究所' },
+        { value: 15, name: '第四研究所' }
+      ]
+      
+      if (!overdueInstituteChart.value) {
+        console.error('逾期任务四个所占比图表容器未找到')
+        return
+      }
+      
+      // 清理旧实例
+      if (overdueInstituteChartInstance) {
+        overdueInstituteChartInstance.dispose()
+      }
+      
+      overdueInstituteChartInstance = echarts.init(overdueInstituteChart.value)
+      
+      const option = {
+        title: {
+          text: '逾期任务四个所占比统计',
+          left: 'center',
+          top: 20,
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
+        },
+        tooltip: {
+          trigger: 'item',
+          formatter: '{a} <br/>{b}: {c}个任务 ({d}%)'
+        },
+        legend: {
+          orient: 'horizontal',
+          left: 'center',
+          top: 60,
+          itemGap: 20
+        },
+        series: [
+          {
+            name: '逾期任务分布',
+            type: 'pie',
+            radius: ['40%', '70%'],
+            center: ['50%', '65%'],
+            avoidLabelOverlap: false,
+            itemStyle: {
+              borderColor: '#fff',
+              borderWidth: 2
+            },
+            label: {
+              show: true,
+              formatter: '{b}: {c}个'
+            },
+            emphasis: {
+              label: {
+                show: true,
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            data: chartData
+          }
+        ],
+        color: ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C']
+      }
+      
+      overdueInstituteChartInstance.setOption(option)
+      
+    } catch (error) {
+      console.error('初始化逾期任务四个所占比图表失败:', error)
+    }
+  }
+
 // 统一的resize事件处理器
 const handleResize = () => {
   if (chartInstance) chartInstance.resize()
@@ -1202,6 +1392,8 @@ const handleResize = () => {
   })
   if (onTimeTaskChartInstance) onTimeTaskChartInstance.resize()
   if (overdueTaskChartInstance) overdueTaskChartInstance.resize()
+  if (lateDistributionChartInstance) lateDistributionChartInstance.resize()
+  if (overdueInstituteChartInstance) overdueInstituteChartInstance.resize()
 }
 
   // 为每个表格创建独立的时间筛选器
@@ -1302,6 +1494,18 @@ const cleanupChart = () => {
   if (overdueTaskChartInstance) {
     overdueTaskChartInstance.dispose()
     overdueTaskChartInstance = null
+  }
+  
+  // 清理迟到人员分布图表实例
+  if (lateDistributionChartInstance) {
+    lateDistributionChartInstance.dispose()
+    lateDistributionChartInstance = null
+  }
+  
+  // 清理逾期任务四个所占比图表实例
+  if (overdueInstituteChartInstance) {
+    overdueInstituteChartInstance.dispose()
+    overdueInstituteChartInstance = null
   }
   
   // 清理事件监听器
