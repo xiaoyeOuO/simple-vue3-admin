@@ -229,6 +229,12 @@ const routes = [
             component: () => import('@/views/personal/home/index.vue')
           }
         ]
+      },
+      {
+        path: '/workplace',
+        name: 'Workplace',
+        meta: { title: '工作台', icon: 'Monitor' },
+        component: () => import('@/views/workplace/index.vue')
       }
     ]
   },
