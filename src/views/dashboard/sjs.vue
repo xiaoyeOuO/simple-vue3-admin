@@ -1,7 +1,6 @@
 <template>
   <div class="sjs-dashboard">
     <div class="dashboard-header">
-      <h1>设计所指标监控</h1>
       <div class="date-filter">
         <el-date-picker
           v-model="dateRange"
@@ -215,7 +214,7 @@
               <el-table-column prop="employeeId" label="工号" width="100" />
               <el-table-column prop="total" label="代码当量" align="center">
                 <template #default="{ row }">
-                  <span class="number-text">{{ row.total.toLocaleString() }}</span>
+                  <span class="number-text">{{ row.total }}</span>
                 </template>
               </el-table-column>
             </el-table>

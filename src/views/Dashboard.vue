@@ -1,9 +1,5 @@
 <template>
   <div class="dashboard">
-    <div class="dashboard-header">
-      <h1>项目仪表板</h1>
-    </div>
-
     <!-- 原始统计卡片 -->
     <el-row :gutter="20" class="stat-cards">
       <el-col :span="6">
