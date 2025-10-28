@@ -210,6 +210,7 @@ onUnmounted(() => {
   border-bottom: 1px solid #e4e7ed;
   padding: 8px 20px;
   position: relative;
+  margin-bottom: 20px;
 }
 
 .tabs-container {
