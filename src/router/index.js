@@ -60,7 +60,7 @@ const routes = [
             path: '/system/worktime',
             name: 'Worktime',
             meta: { title: '工时管理', icon: 'Clock' },
-            component: () => import('@/views/system/worktime/index.vue')
+            component: () => import('@/views/system/workTime/index.vue')
           },
           {
             path: '/system/personnelProfile',
