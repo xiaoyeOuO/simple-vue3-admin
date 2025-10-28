@@ -25,7 +25,6 @@
           :default-active="activeTopMenu"
           class="top-menu"
           @select="handleTopMenuSelect"
-          :ellipsis="false"
         >
           <el-menu-item 
             v-for="menu in topMenus" 
