@@ -338,8 +338,6 @@ const calendarOptions = reactive({
   selectMirror: true,
   dayMaxEvents: true,
   weekends: true,
-  fixedWeekCount: true, // 固定显示5周
-  showNonCurrentDates: true, // 显示非当前月份的日期
   select: handleDateSelect,
   eventClick: handleEventClick,
   eventDrop: handleEventDrop,
