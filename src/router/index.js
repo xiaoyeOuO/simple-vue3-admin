@@ -10,13 +10,21 @@ const routes = [
         path: '/dashboard',
         name: 'Dashboard',
         meta: { title: '仪表盘', icon: 'Monitor' },
-        component: () => import('@/views/Dashboard.vue')
-      },
-      {
-        path: '/dashboard/sjs',
-        name: 'SjsDashboard',
-        meta: { title: '设计所指标', icon: 'DataAnalysis' },
-        component: () => import('@/views/dashboard/sjs.vue')
+        redirect: '/dashboard/overview',
+        children: [
+          {
+            path: '/dashboard/overview',
+            name: 'DashboardOverview',
+            meta: { title: '总览', icon: 'Monitor' },
+            component: () => import('@/views/Dashboard.vue')
+          },
+          {
+            path: '/dashboard/sjs',
+            name: 'SjsDashboard',
+            meta: { title: '设计所指标', icon: 'DataAnalysis' },
+            component: () => import('@/views/dashboard/sjs.vue')
+          }
+        ]
       },
       {
         path: '/system',
@@ -123,15 +131,9 @@ const routes = [
       {
         path: '/report',
         name: 'Report',
-        meta: { title: '数据洞察中心', icon: 'DataAnalysis' },
-        redirect: '/report/index',
+        meta: { title: '报表中心', icon: 'DataAnalysis' },
+        redirect: '/report/todo',
         children: [
-          {
-            path: '/report/index',
-            name: 'ReportIndex',
-            component: () => import('@/views/report/index.vue'),
-            meta: { title: '日报管理', icon: 'Document', hidden: true }
-          },
           {
             path: '/report/todo',
             name: 'ReportTodo',
@@ -142,7 +144,13 @@ const routes = [
             path: '/report/config',
             name: 'ReportConfig',
             component: () => import('@/views/report/config/index.vue'),
-            meta: { title: '日报月报配置', icon: 'Setting' }
+            meta: { title: '报表配置', icon: 'Setting' }
+          },
+          {
+            path: '/report/index',
+            name: 'ReportIndex',
+            component: () => import('@/views/report/index.vue'),
+            meta: { title: '日报管理', icon: 'Document', hidden: true }
           },
           {
             path: '/report/fill/:id',
@@ -211,30 +219,38 @@ const routes = [
         ]
       },
       {
-        path: '/bigData',
-        name: 'BigData',
-        meta: { title: '大数据展示', icon: 'DataLine' },
-        component: () => import('@/views/bigData/index.vue')
-      },
-      {
-        path: '/personal',
-        name: 'Personal',
-        meta: { title: '个人中心', icon: 'User', hidden: true },
-        redirect: '/personal/home',
+        path: '/data',
+        name: 'Data',
+        meta: { title: '数据分析', icon: 'DataLine' },
+        redirect: '/data/bigData',
         children: [
           {
-            path: '/personal/home/:id',
-            name: 'PersonalHome',
-            meta: { title: '个人首页', icon: 'House', hidden: true },
-            component: () => import('@/views/personal/home/index.vue')
+            path: '/data/bigData',
+            name: 'BigData',
+            meta: { title: '大数据展示', icon: 'DataLine' },
+            component: () => import('@/views/bigData/index.vue')
           }
         ]
       },
       {
-        path: '/workplace',
-        name: 'Workplace',
-        meta: { title: '工作台', icon: 'Monitor' },
-        component: () => import('@/views/workplace/index.vue')
+        path: '/workspace',
+        name: 'Workspace',
+        meta: { title: '工作中心', icon: 'Monitor' },
+        redirect: '/workspace/todo',
+        children: [
+          {
+            path: '/workspace/todo',
+            name: 'WorkspaceTodo',
+            meta: { title: '我的待办', icon: 'List' },
+            component: () => import('@/views/workplace/index.vue')
+          },
+          {
+            path: '/workspace/personal/:id',
+            name: 'WorkspacePersonal',
+            meta: { title: '个人中心', icon: 'User' },
+            component: () => import('@/views/personal/home/index.vue')
+          }
+        ]
       }
     ]
   },
