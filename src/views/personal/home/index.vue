@@ -1076,7 +1076,6 @@ onMounted(() => {
 
 <style scoped>
 .personal-home {
-  padding: 20px;
 }
 
 .header-section {

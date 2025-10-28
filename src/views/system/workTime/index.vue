@@ -380,7 +380,6 @@ onMounted(() => {
 
 <style scoped>
 .worktime-management {
-  padding: 20px;
 }
 
 .page-header {

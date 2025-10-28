@@ -288,7 +288,6 @@ onMounted(() => {
 
 <style scoped>
 .supplier-infos {
-  padding: 20px;
 }
 
 .header-card {

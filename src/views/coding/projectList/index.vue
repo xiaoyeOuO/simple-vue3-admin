@@ -155,11 +155,9 @@ const handleSave = (project) => {
 
 <style scoped>
 .project-list-container {
-  padding: 20px;
   background-color: #f5f5f5;
   min-height: 100vh;
 }
-
 .header {
   display: flex;
   justify-content: space-between;

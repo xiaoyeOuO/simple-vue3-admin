@@ -431,7 +431,6 @@ onMounted(() => {
 
 <style scoped>
 .business-project-management {
-  padding: 20px;
   background-color: #fff;
   border-radius: 4px;
 }

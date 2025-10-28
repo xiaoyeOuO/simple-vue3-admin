@@ -328,7 +328,6 @@ onMounted(() => {
 
 <style scoped>
 .module-push-container {
-  padding: 20px;
   background-color: #fff;
   height: 100%;
 }

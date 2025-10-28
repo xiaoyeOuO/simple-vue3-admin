@@ -395,7 +395,6 @@ onUnmounted(() => {
 
 <style scoped>
 .personnel-profile {
-  padding: 20px;
 }
 
 .page-header {

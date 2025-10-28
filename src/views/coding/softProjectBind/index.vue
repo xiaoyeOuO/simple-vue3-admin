@@ -96,7 +96,6 @@ onMounted(() => {
 
 <style scoped>
 .soft-project-bind {
-  padding: 20px;
 }
 
 .page-header {

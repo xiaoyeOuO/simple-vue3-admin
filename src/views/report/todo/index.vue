@@ -376,7 +376,6 @@ onMounted(() => {
 
 <style scoped>
 .todo-container {
-  padding: 20px;
 }
 
 .page-header {

@@ -371,7 +371,6 @@ onMounted(() => {
 
 <style scoped>
 .project-list-container {
-  padding: 20px;
 }
 
 .page-header {

@@ -449,7 +449,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   background-color: #f5f7fa;
-  padding: 20px;
 }
 
 .page-header {

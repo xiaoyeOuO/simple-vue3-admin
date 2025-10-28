@@ -378,7 +378,6 @@ onMounted(() => {
 
 <style scoped>
 .contacts-container {
-  padding: 20px;
 }
 
 .search-card {

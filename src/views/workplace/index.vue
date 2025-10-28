@@ -228,7 +228,6 @@ const handleDateChange = (value) => {
 
 <style scoped>
 .workplace-container {
-  padding: 20px;
 }
 
 .workplace-card {

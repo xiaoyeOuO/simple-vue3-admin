@@ -370,7 +370,6 @@ onMounted(() => {
 
 <style scoped>
 .report-config {
-  padding: 20px;
 }
 
 .header-card {
