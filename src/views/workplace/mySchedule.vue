@@ -198,7 +198,8 @@ const currentMonth = computed(() => {
 })
 
 // wangEditor相关
-const editorRef = ref()
+// const editorRef = ref()
+const editorRef = shallowRef()
 const editorConfig = {
   placeholder: '请输入日程描述...',
   readOnly: false,
