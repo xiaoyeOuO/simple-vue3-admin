@@ -168,14 +168,22 @@ const closeAllTags = async () => {
 const refreshSelectedTag = () => {
   if (!contextMenuTag.value) return
   
-  // 使用路由重载来刷新页面
-  const { path, query } = contextMenuTag.value
-  router.replace({
-    path: '/redirect' + path,
-    query: query || {}
-  }).then(() => {
-    router.replace({ path, query: query || {} })
-  })
+  // 先从缓存中移除该组件
+  const viewName = contextMenuTag.value.name
+  if (viewName) {
+    // 临时从缓存列表中移除
+    const tempExclude = [viewName]
+    
+    // 使用路由重载来刷新页面
+    const { path, query } = contextMenuTag.value
+    router.replace({
+      path: '/redirect' + path,
+      query: query || {}
+    }).then(() => {
+      // 重新添加回缓存
+      router.replace({ path, query: query || {} })
+    })
+  }
   
   closeContextMenu()
 }

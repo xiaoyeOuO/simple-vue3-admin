@@ -65,6 +65,12 @@ export const useTabsStore = defineStore('tabs', () => {
     })
   }
 
+  // 清除缓存（用于刷新页面时）
+  const clearCache = () => {
+    // 这里可以添加清除特定页面缓存的逻辑
+    // 目前使用 Vue 的 KeepAlive 会自动管理缓存
+  }
+
   // 删除其他标签页
   const delOthersViews = (view) => {
     return new Promise((resolve) => {
@@ -117,6 +123,7 @@ export const useTabsStore = defineStore('tabs', () => {
     delOthersViews,
     delAllViews,
     isAffix,
-    closeCurrentView
+    closeCurrentView,
+    clearCache
   }
 })

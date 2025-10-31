@@ -144,7 +144,11 @@
       <!-- 主内容区 -->
       <el-main class="layout-main">
         <TabBreadcrumb />
-        <router-view />
+        <router-view v-slot="{ Component }">
+          <keep-alive :include="cachedViews">
+            <component :is="Component" />
+          </keep-alive>
+        </router-view>
       </el-main>
     </el-container>
   </el-container>
@@ -155,13 +159,22 @@ import { computed, ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Menu, Close } from '@element-plus/icons-vue'
 import TabBreadcrumb from '@/components/TabBreadcrumb.vue'
+import { useTabsStore } from '@/stores/tabs'
 
 const route = useRoute()
 const router = useRouter()
+const tabsStore = useTabsStore()
 
 // 移动端状态管理
 const isMobile = ref(false)
 const isSidebarOpen = ref(false)
+
+// 缓存的视图列表
+const cachedViews = computed(() => {
+  return tabsStore.visitedViews
+    .filter(view => view.name && !view.meta?.noCache) // 过滤掉不需要缓存的页面
+    .map(view => view.name)
+})
 
 // 检测是否为移动端
 const checkMobile = () => {
