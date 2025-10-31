@@ -169,7 +169,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onBeforeUnmount, computed, onMounted } from 'vue'
+import { ref, reactive, onBeforeUnmount, computed, onMounted, shallowRef } from 'vue'
 import FullCalendar from '@fullcalendar/vue3'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
