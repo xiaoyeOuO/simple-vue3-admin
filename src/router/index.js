@@ -163,7 +163,13 @@ const routes = [
             name: 'ReportInstance',
             component: () => import('@/views/report/instance/index.vue'),
             meta: { title: '实例管理', icon: 'Monitor', hidden: true }
-          }
+          },
+          {
+          path: 'task-statistics',
+          name: 'TaskStatistics',
+          component: () => import('@/views/report/task-statistics.vue'),
+          meta: { title: '任务统计', icon: 'DataAnalysis' }
+        }
         ]
       },
       {
@@ -249,6 +255,26 @@ const routes = [
             name: 'WorkspacePersonal',
             meta: { title: '个人中心', icon: 'User' },
             component: () => import('@/views/personal/home/index.vue')
+          }
+        ]
+      },
+      {
+        path: '/demo',
+        name: 'Demo',
+        meta: { title: '演示功能', icon: 'Monitor' },
+        redirect: '/demo/permission',
+        children: [
+          {
+            path: '/demo/permission',
+            name: 'PermissionDemo',
+            meta: { title: '权限演示', icon: 'Key' },
+            component: () => import('@/views/demo/PermissionDemo.vue')
+          },
+          {
+            path: '/demo/directive',
+            name: 'DirectiveDemo',
+            meta: { title: '指令演示', icon: 'Magic' },
+            component: () => import('@/views/demo/DirectiveDemo.vue')
           }
         ]
       }

@@ -8,6 +8,7 @@ import 'vxe-table/lib/style.css'
 import router from './router'
 import App from './App.vue'
 import './style.css'
+import directives from './directives'
 
 const app = createApp(App)
 const pinia = createPinia()
@@ -21,4 +22,5 @@ app.use(ElementPlus)
 app.use(VXETable)
 app.use(router)
 app.use(pinia)
+app.use(directives) // 注册自定义指令
 app.mount('#app')

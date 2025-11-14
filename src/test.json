@@ -1,0 +1,174 @@
+{
+    "result": [
+        {
+            "date": "2025-01-01 00:00:00",
+            "dateStr": null,
+            "units": [
+                {
+                    "data": {
+                        "doneActualCount": 0,
+                        "doneActualList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "donePlanCount": 73,
+                        "donePlanList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "dueLeaveDoneCount": 0,
+                        "dueLeaveDoneList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "dueLeaveNotDoneCount": 25,
+                        "dueLeaveNotDoneList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "startCount": 586,
+                        "startList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ]
+                    },
+                    "unitId": "111111",
+                    "unitName": "第一研发所"
+                },
+                {
+                    "data": {
+                        "doneActualCount": 0,
+                        "doneActualList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "donePlanCount": 73,
+                        "donePlanList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "dueLeaveDoneCount": 0,
+                        "dueLeaveDoneList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "dueLeaveNotDoneCount": 25,
+                        "dueLeaveNotDoneList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "startCount": 586,
+                        "startList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ]
+                    },
+                    "unitId": "222222",
+                    "unitName": "第二研发所"
+                },
+                {
+                    "data": {
+                        "doneActualCount": 0,
+                        "doneActualList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "donePlanCount": 73,
+                        "donePlanList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "dueLeaveDoneCount": 0,
+                        "dueLeaveDoneList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "dueLeaveNotDoneCount": 25,
+                        "dueLeaveNotDoneList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "startCount": 586,
+                        "startList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ]
+                    },
+                    "unitId": "333333",
+                    "unitName": "第三研发所"
+                },
+                {
+                    "data": {
+                        "doneActualCount": 0,
+                        "doneActualList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "donePlanCount": 73,
+                        "donePlanList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "dueLeaveDoneCount": 0,
+                        "dueLeaveDoneList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "dueLeaveNotDoneCount": 25,
+                        "dueLeaveNotDoneList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ],
+                        "startCount": 586,
+                        "startList": [
+                            {
+                                "taskName": "任务1",
+                                "taskUser": "张三"
+                            }
+                        ]
+                    },
+                    "unitId": "444444",
+                    "unitName": "第四研发所"
+                }
+            ]
+        }
+    ]
+}

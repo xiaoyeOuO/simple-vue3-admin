@@ -518,7 +518,13 @@
       <template #header>
         <div class="card-header">
           <span>四个设计所人员分布</span>
-          <el-tag type="info">当前统计</el-tag>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <el-tag type="info">当前统计</el-tag>
+            <el-button type="primary" size="small" @click="refreshPieCharts" :loading="loading">
+              <el-icon><Refresh /></el-icon>
+              刷新
+            </el-button>
+          </div>
         </div>
       </template>
       <div class="pie-charts-container">
@@ -894,7 +900,11 @@ const initTaskHoursChart = async (startDate, endDate) => {
 
 // 动态初始化人员分布饼图（支持任意数量研究所）
 const initPieCharts = async (pieData) => {
+  // 等待DOM更新
   await nextTick()
+  
+  // 等待额外的时间确保DOM完全加载
+  await new Promise(resolve => setTimeout(resolve, 300))
 
   // 清理现有饼图实例
   pieChartInstances.forEach(instance => {
@@ -904,15 +914,24 @@ const initPieCharts = async (pieData) => {
 
   // 清空容器，为动态生成做准备
   const container = document.querySelector('.pie-charts-container')
-  if (container) container.innerHTML = ''
+  if (!container) {
+    console.error('饼图容器未找到')
+    return
+  }
+  
+  container.innerHTML = ''
 
   if (!pieData || pieData.length === 0) {
     container.innerHTML = '<div style="text-align: center; color: #909399; padding: 40px;">暂无数据</div>'
     return
   }
+  
+  console.log('初始化饼图，数据:', pieData)
 
   // 动态生成饼图DOM并初始化
-  pieData.forEach(item => {
+  pieData.forEach((item, index) => {
+    console.log(`创建第${index + 1}个饼图:`, item.name)
+    
     // 创建单个饼图容器
     const itemDiv = document.createElement('div')
     itemDiv.className = 'pie-chart-item'
@@ -941,11 +960,12 @@ const initPieCharts = async (pieData) => {
 
     // 初始化ECharts实例
     const chart = echarts.init(chartDiv)
+    console.log(`初始化ECharts实例 ${index + 1} 完成`)
     chart.setOption({
       tooltip: { trigger: 'item', formatter: '{a} <br/>{b}: {c} ({d}%)' },
       legend: {
         orient: 'vertical',
-        right: 0,
+        right: 5,
         top: 'middle',
         itemWidth: 10,
         itemHeight: 10,
@@ -955,13 +975,37 @@ const initPieCharts = async (pieData) => {
       series: [{
         name: item.name,
         type: 'pie',
-        radius: ['28%', '52%'],
-        center: ['33%', '50%'],
-        avoidLabelOverlap: false,
+        radius: ['25%', '45%'],
+        center: ['30%', '50%'],
+        avoidLabelOverlap: true,
         itemStyle: { borderColor: '#fff', borderWidth: 1 },
-        label: { show: false, position: 'center' },
-        emphasis: { label: { show: true, fontSize: 12, fontWeight: 'bold' } },
-        labelLine: { show: false },
+        label: { 
+          show: true, 
+          position: 'outside',
+          formatter: '{b}\n{c}人 ({d}%)',
+          fontSize: 9,
+          color: '#333',
+          lineHeight: 12
+        },
+        emphasis: { 
+          label: { 
+            show: true, 
+            fontSize: 11, 
+            fontWeight: 'bold',
+            color: '#000'
+          },
+          itemStyle: {
+            shadowBlur: 10,
+            shadowOffsetX: 0,
+            shadowColor: 'rgba(0, 0, 0, 0.5)'
+          }
+        },
+        labelLine: { 
+          show: true,
+          length: 20,
+          length2: 15,
+          smooth: 0.2
+        },
         data: item.data
       }],
       color: ['#409EFF', '#67C23A', '#E6A23C', '#F56C6C']
@@ -981,18 +1025,49 @@ const initPieCharts = async (pieData) => {
       // const res = await fetch('/api/dashboard/institute-personnel-stats').then(r => r.json())
       // return res.data
 
-      // 模拟后端返回任意数量研究所的数据
-      // 可以测试不同数量的研究所：
+      // 生成更丰富的假数据 - 完全随机化
+      const generateInstituteData = (name) => {
+        // 随机生成基础人数（80-200人）
+        const baseCount = Math.floor(Math.random() * 120) + 80
+        
+        // 各类人员比例随机化，但保持合理范围
+        const registeredRatio = 0.6 + Math.random() * 0.2  // 60%-80%
+        const laborRatio = 0.1 + Math.random() * 0.15     // 10%-25%
+        const outsourcedRatio = 0.05 + Math.random() * 0.15 // 5%-20%
+        const centralizedRatio = 0.02 + Math.random() * 0.08 // 2%-10%
+        
+        // 计算各类人员数量
+        const registered = Math.floor(baseCount * registeredRatio)
+        const labor = Math.floor(baseCount * laborRatio)
+        const outsourced = Math.floor(baseCount * outsourcedRatio)
+        const centralized = Math.floor(baseCount * centralizedRatio)
+        
+        // 确保总数匹配
+        const total = registered + labor + outsourced + centralized
+        
+        console.log(`${name} - 总人数: ${total}, 在册: ${registered}, 劳务: ${labor}, 外包: ${outsourced}, 集中: ${centralized}`)
+        
+        return {
+          name: name,
+          data: [
+            { value: registered, name: '在册人员' },
+            { value: labor, name: '劳务人员' },
+            { value: outsourced, name: '外包人员' },
+            { value: centralized, name: '集中办公人员' }
+          ]
+        }
+      }
+
+      // 模拟后端返回四个研究所的数据 - 每次调用都重新随机生成
       const mockData = [
-        { name: '第一研究所', data: [{ value: 120, name: '在册人员' }, { value: 45, name: '劳务人员' }, { value: 30, name: '外包人员' }, { value: 15, name: '集中办公人员' }] },
-        { name: '第二研究所', data: [{ value: 98, name: '在册人员' }, { value: 38, name: '劳务人员' }, { value: 25, name: '外包人员' }, { value: 12, name: '集中办公人员' }] },
-        { name: '第三研究所', data: [{ value: 135, name: '在册人员' }, { value: 52, name: '劳务人员' }, { value: 35, name: '外包人员' }, { value: 18, name: '集中办公人员' }] },
-        { name: '第四研究所', data: [{ value: 110, name: '在册人员' }, { value: 42, name: '劳务人员' }, { value: 28, name: '外包人员' }, { value: 14, name: '集中办公人员' }] }
+        generateInstituteData('第一研究所'),
+        generateInstituteData('第二研究所'),
+        generateInstituteData('第三研究所'),
+        generateInstituteData('第四研究所')
       ]
       
-      // 测试不同数量：可以改为3个或5个研究所
-      // return mockData.slice(0, 3) // 3个研究所
-      return mockData // 4个研究所
+      console.log('生成的假数据:', mockData)
+      return mockData
     } catch (e) {
       console.error('获取饼图数据失败:', e)
       // 错误时使用默认数据
@@ -1014,8 +1089,9 @@ const initPieCharts = async (pieData) => {
         ])
         
         // 获取饼图数据并动态生成
-        const pieData = await fetchPieData()
-        await initPieCharts(pieData)
+      const pieData = await fetchPieData()
+      console.log('获取到的饼图数据:', pieData)
+      await initPieCharts(pieData)
         
         // 使用默认时间范围初始化任务工时趋势图表
         await initTaskHoursChart(tableDateRanges.value.taskHours[0], tableDateRanges.value.taskHours[1])
@@ -1050,6 +1126,20 @@ const initPieCharts = async (pieData) => {
     
     const testData = allData.slice(0, count)
     await initPieCharts(testData)
+  }
+
+  // 刷新饼图数据
+  const refreshPieCharts = async () => {
+    try {
+      loading.value = true
+      const pieData = await fetchPieData()
+      console.log('刷新饼图数据:', pieData)
+      await initPieCharts(pieData)
+    } catch (error) {
+      console.error('刷新饼图失败:', error)
+    } finally {
+      loading.value = false
+    }
   }
 
   // 初始化按时完成任务占比饼图
@@ -1511,7 +1601,6 @@ const cleanupChart = () => {
 // 初始化
 onMounted(async () => {
   await fetchAllData()
-  await initPieCharts()
   
   // 添加统一的resize事件监听器
   window.addEventListener('resize', handleResize)
@@ -1753,9 +1842,9 @@ onUnmounted(() => {
 
 .pie-chart-item {
   flex: 1;
-  min-width: 240px;
-  max-width: 320px;
-  height: 320px;
+  min-width: 280px;
+  max-width: 360px;
+  height: 350px;
   flex-shrink: 1;
   display: flex;
   align-items: center;
@@ -1786,25 +1875,25 @@ onUnmounted(() => {
 
 @media (max-width: 1200px) {
   .pie-chart-item {
-    min-width: 200px;
-    max-width: 240px;
-    height: 300px;
+    min-width: 240px;
+    max-width: 300px;
+    height: 330px;
   }
 }
 
 @media (max-width: 992px) {
   .pie-chart-item {
-    min-width: 180px;
-    max-width: 220px;
-    height: 280px;
+    min-width: 220px;
+    max-width: 280px;
+    height: 310px;
   }
 }
 
 @media (max-width: 768px) {
   .pie-chart-item {
-    min-width: 160px;
-    max-width: 200px;
-    height: 260px;
+    min-width: 200px;
+    max-width: 260px;
+    height: 290px;
   }
 }
 
@@ -1815,9 +1904,9 @@ onUnmounted(() => {
   }
   
   .pie-chart-item {
-    min-width: 140px;
-    max-width: 180px;
-    height: 240px;
+    min-width: 180px;
+    max-width: 240px;
+    height: 270px;
   }
 }
 </style>
